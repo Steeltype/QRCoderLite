@@ -131,15 +131,4 @@ namespace Steeltype.QRCoderLite
         }
 
     }
-
-    public static class QRCodeHelper
-    {
-        public static SKBitmap GetQRCode(string plainText, int pixelsPerModule, SKColor darkColor, SKColor lightColor, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, SKBitmap icon = null, int iconSizePercent = 15, int iconBorderWidth = 0, bool drawQuietZones = true)
-        {
-            using var qrGenerator = new QRCodeGenerator();
-            using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
-            using var qrCode = new QRCode(qrCodeData);
-            return qrCode.GetGraphic(pixelsPerModule, darkColor, lightColor, icon, iconSizePercent, iconBorderWidth, drawQuietZones);
-        }
-    }
 }

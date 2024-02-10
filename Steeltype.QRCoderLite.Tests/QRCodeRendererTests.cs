@@ -12,8 +12,7 @@ namespace Steeltype.QRCoderLite.Tests
         [Category("QRRenderer/QRCode")]
         public void can_create_qrcode_standard_graphic()
         {
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
             var bmp = new QRCode(data).GetGraphic(10);
 
             var result = HelperFunctions.BitmapToHash(bmp);
@@ -24,8 +23,7 @@ namespace Steeltype.QRCoderLite.Tests
         [Category("QRRenderer/QRCode")]
         public void can_create_qrcode_standard_graphic_hex()
         {
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
             var bmp = new QRCode(data).GetGraphic(10, "#000000", "#ffffff");
 
             var result = HelperFunctions.BitmapToHash(bmp);
@@ -37,8 +35,7 @@ namespace Steeltype.QRCoderLite.Tests
         [Category("QRRenderer/QRCode")]
         public void can_create_qrcode_standard_graphic_without_quietzones()
         {
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
             var bmp = new QRCode(data).GetGraphic(5, SKColors.Black, SKColors.White, false);
 
             var result = HelperFunctions.BitmapToHash(bmp);
@@ -51,8 +48,7 @@ namespace Steeltype.QRCoderLite.Tests
         public void can_create_qrcode_with_transparent_logo_graphic()
         {
             //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
 
             string imagePath = Path.Combine(HelperFunctions.GetAssemblyPath(), "assets", "noun_software engineer_2909346.png");
             var logo = SKBitmap.Decode(imagePath);
@@ -68,8 +64,7 @@ namespace Steeltype.QRCoderLite.Tests
         public void can_create_qrcode_with_non_transparent_logo_graphic()
         {
             //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
 
             //Used logo is licensed under public domain. Ref.: https://thenounproject.com/Iconathon1/collection/redefining-women/?i=2909346
             string imagePath = Path.Combine(HelperFunctions.GetAssemblyPath(), "assets", "noun_software engineer_2909346.png");
@@ -86,8 +81,7 @@ namespace Steeltype.QRCoderLite.Tests
         public void can_create_qrcode_with_logo_and_with_transparent_border()
         {
             //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
 
             //Used logo is licensed under public domain. Ref.: https://thenounproject.com/Iconathon1/collection/redefining-women/?i=2909346
             string imagePath = Path.Combine(HelperFunctions.GetAssemblyPath(), "assets", "noun_software engineer_2909346.png");
@@ -103,8 +97,7 @@ namespace Steeltype.QRCoderLite.Tests
         public void can_create_qrcode_with_logo_and_with_standard_border()
         {
             //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
 
             //Used logo is licensed under public domain. Ref.: https://thenounproject.com/Iconathon1/collection/redefining-women/?i=2909346
             string imagePath = Path.Combine(HelperFunctions.GetAssemblyPath(), "assets", "noun_software engineer_2909346.png");
@@ -120,8 +113,7 @@ namespace Steeltype.QRCoderLite.Tests
         public void can_create_qrcode_with_logo_and_with_custom_border()
         {
             //Create QR code
-            var gen = new QRCodeGenerator();
-            var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
+            var data = QRCodeGenerator.GenerateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
 
             //Used logo is licensed under public domain. Ref.: https://thenounproject.com/Iconathon1/collection/redefining-women/?i=2909346
             string imagePath = Path.Combine(HelperFunctions.GetAssemblyPath(), "assets", "noun_software engineer_2909346.png");
@@ -141,17 +133,5 @@ namespace Steeltype.QRCoderLite.Tests
             svgCode.ShouldNotBeNull();
             svgCode.ShouldBeOfType<QRCode>();
         }
-
-        [Fact]
-        [Category("QRRenderer/QRCode")]
-        public void can_render_qrcode_from_helper()
-        {
-            //Create QR code                   
-            var bmp = QRCodeHelper.GetQRCode("This is a quick test! 123#?", 10, SKColors.Black, SKColors.White, QRCodeGenerator.ECCLevel.H);
-
-            var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("1e0afd60c239d24be2ce0f8286a16918");
-        }
-
     }
 }
