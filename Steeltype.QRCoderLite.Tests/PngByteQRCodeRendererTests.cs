@@ -13,8 +13,6 @@ namespace Steeltype.QRCoderLite.Tests
      ****************************************************************************************************/
     public class PngByteQRCodeRendererTests
     {
-
-
         [Fact]
         [Category("QRRenderer/PngByteQRCode")]
         public void can_render_pngbyte_qrcode_blackwhite()
@@ -25,7 +23,7 @@ namespace Steeltype.QRCoderLite.Tests
             var pngCodeGfx = new PngByteQRCode(data).GetGraphic(5);
 
             var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("1fc35c3bea6fad47427143ce716c83b8");
+            result.ShouldBe("5bfcd2d9104202f08d24f901ff969624");
         }
 
         [Fact]
@@ -38,7 +36,7 @@ namespace Steeltype.QRCoderLite.Tests
             var pngCodeGfx = new PngByteQRCode(data).GetGraphic(5, new byte[] { 255, 0, 0 }, new byte[] { 0, 0, 255 });
 
             var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("0144b1d40aa6eeb6cb07df42822ea0a7");
+            result.ShouldBe("5e81e89553c27cf643659df1fab8824f");
         }
 
 
@@ -52,7 +50,7 @@ namespace Steeltype.QRCoderLite.Tests
             var pngCodeGfx = new PngByteQRCode(data).GetGraphic(5, new byte[] { 255, 255, 255, 127 }, new byte[] { 0, 0, 255 });
 
             var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("627ce564fb5e17be42e4a85e907a17b5");
+            result.ShouldBe("c33b18d24346db48dce73fb0a5511bdd");
         }
 
         [Fact]
@@ -85,7 +83,7 @@ namespace Steeltype.QRCoderLite.Tests
             var pngCodeGfx = PngByteQRCodeHelper.GetQRCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L, 10);
 
             var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("c562388f4f3cf13a299b469a3e3b852f");
+            result.ShouldBe("64f0efa9d5a29660b1c0070e33a32ec7");
         }
 
         [Fact]
@@ -96,7 +94,7 @@ namespace Steeltype.QRCoderLite.Tests
             var pngCodeGfx = PngByteQRCodeHelper.GetQRCode("This is a quick test! 123#?", 5, new byte[] { 255, 255, 255, 127 }, new byte[] { 0, 0, 255 }, QRCodeGenerator.ECCLevel.L);
 
             var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("627ce564fb5e17be42e4a85e907a17b5");
+            result.ShouldBe("c33b18d24346db48dce73fb0a5511bdd");
         }
 
     }

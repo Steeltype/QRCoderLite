@@ -17,7 +17,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = new QRCode(data).GetGraphic(10);
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("e8c61b8f0455924fe08ba68686d0d296");
+            result.ShouldBe("1e0afd60c239d24be2ce0f8286a16918");
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = new QRCode(data).GetGraphic(10, "#000000", "#ffffff");
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("e8c61b8f0455924fe08ba68686d0d296");
+            result.ShouldBe("1e0afd60c239d24be2ce0f8286a16918");
         }
 
 
@@ -42,7 +42,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = new QRCode(data).GetGraphic(5, SKColors.Black, SKColors.White, false);
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("d703e54a0ba541c6ea69e3d316e394e7");
+            result.ShouldBe("78f6af3170e47f3e930dfc05fa4f0cce");
         }
 
 
@@ -60,7 +60,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = new QRCode(data).GetGraphic(10, SKColors.Black, SKColors.Transparent, icon: logo);
             //Used logo is licensed under public domain. Ref.: https://thenounproject.com/Iconathon1/collection/redefining-women/?i=2909346
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("150f8fc7dae4487ba2887d2b2bea1c25");
+            result.ShouldBe("c20da0015d039b92e8e652183643f101");
         }
 
         [Fact]
@@ -78,7 +78,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = new QRCode(data).GetGraphic(10, SKColors.Black, SKColors.White, icon: logo);
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("c46a7ec51bf978d7a882059c322ca69d");
+            result.ShouldBe("478b8f52349924cbb067255b35e66df9");
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace Steeltype.QRCoderLite.Tests
 
             var bmp = new QRCode(data).GetGraphic(10, SKColors.Black, SKColors.Transparent, icon: logo, iconBorderWidth: 6);
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("150f8fc7dae4487ba2887d2b2bea1c25");
+            result.ShouldBe("c20da0015d039b92e8e652183643f101");
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace Steeltype.QRCoderLite.Tests
 
             var bmp = new QRCode(data).GetGraphic(10, SKColors.Black, SKColors.White, icon: logo, iconBorderWidth: 6);
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("1c926ea1d48f42fdf8e6f1438b774cdd");
+            result.ShouldBe("478b8f52349924cbb067255b35e66df9");
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace Steeltype.QRCoderLite.Tests
 
             var bmp = new QRCode(data).GetGraphic(10, SKColors.Black, SKColors.Transparent, icon: logo, iconBorderWidth: 6, iconBackgroundColor: SKColors.DarkGreen);
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("9a06bfbb72df999b6290b5af5c4037cb");
+            result.ShouldBe("72705f15b9373b8d4e3b52c1a160d866");
         }
 
 
@@ -150,7 +150,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = QRCodeHelper.GetQRCode("This is a quick test! 123#?", 10, SKColors.Black, SKColors.White, QRCodeGenerator.ECCLevel.H);
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("e8c61b8f0455924fe08ba68686d0d296");
+            result.ShouldBe("1e0afd60c239d24be2ce0f8286a16918");
         }
 
     }

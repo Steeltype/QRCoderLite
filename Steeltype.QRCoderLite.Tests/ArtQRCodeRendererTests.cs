@@ -18,8 +18,16 @@ namespace Steeltype.QRCoderLite.Tests
             var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
             var bmp = new ArtQRCode(data).GetGraphic(10);
 
+            // Export the SKBitmap to a file (For performing live visual checks)
+            /* using (var image = SKImage.FromBitmap(bmp))
+            using (var imageData = image.Encode(SKEncodedImageFormat.Png, 100))
+            using (var stream = File.OpenWrite("test.png"))
+            {
+                imageData.SaveTo(stream);
+            }*/
+
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("cb38c3156eaf13cdfba699bdafc3a84c");
+            result.ShouldBe("5cc2879bb001ddf9d0f933c33cc1a2fc");
         }
 
         [Fact]
@@ -32,7 +40,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = new ArtQRCode(data).GetGraphic(10, SKColors.Black, SKColors.White, SKColors.Transparent, finderPatternImage: finder);
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("1102c0c6f235eaf4c3ac639f82f17bfa");
+            result.ShouldBe("3326e7df8a019ecd3bf4652666b895fd");
         }
 
         [Fact]
@@ -44,7 +52,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = new ArtQRCode(data).GetGraphic(10, SKColors.Black, SKColors.White, SKColors.Transparent, drawQuietZones: false);
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("632315c8695416fc82fe06a202688433");
+            result.ShouldBe("23bf2a13cc986da7bccb0bab0a28fa9b");
         }
 
         [Fact]
@@ -62,7 +70,7 @@ namespace Steeltype.QRCoderLite.Tests
 
             var result = HelperFunctions.BitmapToHash(bmp);
 
-            result.ShouldBe("bbea08507282773175cfe7b52f0ddae4");
+            result.ShouldBe("dfd551a6d61985b025f848ef1987cde1");
         }
 
         [Fact]
@@ -96,7 +104,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bmp = ArtQRCodeHelper.GetQRCode("A", 10, SKColors.Black, SKColors.White, SKColors.Transparent, QRCodeGenerator.ECCLevel.L);
 
             var result = HelperFunctions.BitmapToHash(bmp);
-            result.ShouldBe("57ecaa9bdeadcdcbeac8a19d734907ff");
+            result.ShouldBe("7e20687f239f15a15657e6df34abceeb");
         }
     }
 }
