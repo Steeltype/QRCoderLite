@@ -9,7 +9,7 @@ namespace Steeltype.QRCoderLite
         /// </summary>
         public QRCode() { }
 
-        public QRCode(QRCodeData data) : base(data) {}
+        public QRCode(QRCodeData data) : base(data) { }
 
         public SKBitmap GetGraphic(int pixelsPerModule)
         {
@@ -137,7 +137,7 @@ namespace Steeltype.QRCoderLite
         }
 
     }
-    
+
     public static class QRCodeHelper
     {
         public static SKBitmap GetQRCode(string plainText, int pixelsPerModule, SKColor darkColor, SKColor lightColor, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, SKBitmap icon = null, int iconSizePercent = 15, int iconBorderWidth = 0, bool drawQuietZones = true)

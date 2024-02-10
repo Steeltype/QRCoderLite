@@ -1,6 +1,6 @@
-﻿using System.Security.Cryptography;
+﻿using SkiaSharp;
+using System.Security.Cryptography;
 using System.Text;
-using SkiaSharp;
 
 
 namespace Steeltype.QRCoderLite.Tests.Helpers

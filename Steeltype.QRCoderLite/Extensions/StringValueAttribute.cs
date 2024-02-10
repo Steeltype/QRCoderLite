@@ -24,7 +24,7 @@ namespace Steeltype.QRCoderLite.Extensions
         public StringValueAttribute(string value)
         {
             this.StringValue = value;
-        }        
+        }
     }
 
     public static class CustomExtensions
@@ -35,7 +35,7 @@ namespace Steeltype.QRCoderLite.Extensions
         /// <param name="value"></param>
         /// <returns></returns>
         public static string GetStringValue(this Enum value)
-        {   
+        {
             var fieldInfo = value.GetType().GetRuntimeField(value.ToString());
             var attr = fieldInfo.GetCustomAttributes(typeof(StringValueAttribute), false) as StringValueAttribute[];
             return attr.Length > 0 ? attr[0].StringValue : null;

@@ -6,7 +6,7 @@ namespace Steeltype.QRCoderLite.Tests
 {
 
     public class AsciiQRCodeRendererTests
-    {                        
+    {
 
         [Fact]
         [Category("QRRenderer/AsciiQRCode")]
@@ -31,7 +31,7 @@ namespace Steeltype.QRCoderLite.Tests
             //Create QR code
             var gen = new QRCodeGenerator();
             var data = gen.CreateQrCode("A05", QRCodeGenerator.ECCLevel.Q);
-            var asciiCode = new AsciiQRCode(data).GetGraphic(1, drawQuietZones : false);
+            var asciiCode = new AsciiQRCode(data).GetGraphic(1, drawQuietZones: false);
 
             asciiCode.ShouldBe(targetCode);
         }

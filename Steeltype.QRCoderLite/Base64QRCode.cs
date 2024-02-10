@@ -9,15 +9,18 @@ namespace Steeltype.QRCoderLite
         /// <summary>
         /// Constructor without params to be used in COM Objects connections
         /// </summary>
-        public Base64QRCode() {
+        public Base64QRCode()
+        {
             qr = new QRCode();
         }
 
-        public Base64QRCode(QRCodeData data) : base(data) {
+        public Base64QRCode(QRCodeData data) : base(data)
+        {
             qr = new QRCode(data);
         }
 
-        public override void SetQRCodeData(QRCodeData data) {
+        public override void SetQRCodeData(QRCodeData data)
+        {
             this.qr.SetQRCodeData(data);
         }
 
@@ -59,7 +62,7 @@ namespace Steeltype.QRCoderLite
             return Convert.ToBase64String(memoryStream.ToArray());
         }
     }
-    
+
     public static class Base64QRCodeHelper
     {
         public static string GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)

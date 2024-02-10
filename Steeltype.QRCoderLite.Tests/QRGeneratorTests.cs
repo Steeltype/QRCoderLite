@@ -1,8 +1,8 @@
-﻿using System.Collections;
+﻿using Shouldly;
+using Steeltype.QRCoderLite.Tests.Helpers;
+using System.Collections;
 using System.Reflection;
 using System.Text;
-using Shouldly;
-using Steeltype.QRCoderLite.Tests.Helpers;
 using Xunit;
 
 namespace Steeltype.QRCoderLite.Tests

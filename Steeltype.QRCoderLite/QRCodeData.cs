@@ -79,7 +79,7 @@ namespace Steeltype.QRCoderLite
             var bytes = new List<byte>();
 
             //Add header - signature ("QRR")
-            bytes.AddRange(new byte[]{ 0x51, 0x52, 0x52, 0x00 });
+            bytes.AddRange(new byte[] { 0x51, 0x52, 0x52, 0x00 });
 
             //Add header - rowsize
             bytes.Add((byte)ModuleMatrix.Count);

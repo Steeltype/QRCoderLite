@@ -51,8 +51,8 @@ namespace Steeltype.QRCoderLite
         /// <param name="backgroundImageStyle">Style of the background image (if set). Fill=spanning complete graphic; DataAreaOnly=Don't paint background into quiet zone</param>
         /// <param name="finderPatternImage">Optional image that should be used instead of the default finder patterns</param>
         /// <returns>QRCode graphic as bitmap</returns>
-        public SKBitmap GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKColor backgroundColor, SKBitmap backgroundImage = null, double pixelSizeFactor = 0.8, 
-                                   bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Dotted, 
+        public SKBitmap GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKColor backgroundColor, SKBitmap backgroundImage = null, double pixelSizeFactor = 0.8,
+                                   bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Dotted,
                                    BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly, SKBitmap finderPatternImage = null)
         {
             if (pixelSizeFactor > 1)
@@ -73,7 +73,7 @@ namespace Steeltype.QRCoderLite
                 SKRect backgroundDestRect = backgroundImageStyle == BackgroundImageStyle.Fill
                     ? new SKRect(0, 0, size, size)
                     : new SKRect(offset * pixelsPerModule, offset * pixelsPerModule, size - offset * pixelsPerModule, size - offset * pixelsPerModule);
-                
+
                 SKBitmap resizedBackgroundImage = Resize(backgroundImage, size);
                 canvas.DrawBitmap(resizedBackgroundImage, backgroundDestRect);
             }
@@ -140,7 +140,7 @@ namespace Steeltype.QRCoderLite
                     IsAntialias = true, // Enable anti-aliasing for smoother edges
                     Style = SKPaintStyle.Fill // Ensure the ellipse is filled
                 };
-        
+
                 // Draw filled ellipse
                 canvas.DrawOval(new SKRect(0, 0, pixelSize, pixelSize), paint);
             }
@@ -265,7 +265,7 @@ namespace Steeltype.QRCoderLite
             DataAreaOnly
         }
     }
-    
+
     public static class ArtQRCodeHelper
     {
         /// <summary>
@@ -288,9 +288,9 @@ namespace Steeltype.QRCoderLite
         /// <param name="backgroundImageStyle">Style of the background image (if set). Fill=spanning complete graphic; DataAreaOnly=Don't paint background into quietzone</param>
         /// <param name="finderPatternImage">Optional image that should be used instead of the default finder patterns</param>
         /// <returns>QRCode graphic as bitmap</returns>
-        public static SKBitmap GetQRCode(string plainText, int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKColor backgroundColor, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, 
+        public static SKBitmap GetQRCode(string plainText, int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKColor backgroundColor, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false,
                                        bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, SKBitmap backgroundImage = null, double pixelSizeFactor = 0.8,
-                                       bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Flat, 
+                                       bool drawQuietZones = true, QuietZoneStyle quietZoneRenderingStyle = QuietZoneStyle.Flat,
                                        BackgroundImageStyle backgroundImageStyle = BackgroundImageStyle.DataAreaOnly, SKBitmap finderPatternImage = null)
         {
             using var qrGenerator = new QRCodeGenerator();

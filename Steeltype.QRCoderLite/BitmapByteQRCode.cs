@@ -42,22 +42,22 @@ namespace Steeltype.QRCoderLite
             bmp.AddRange(new byte[] { 0x01, 0x00, 0x18, 0x00 });
 
             //draw qr code
-            for (var x = sideLength-1; x >= 0; x = x - pixelsPerModule)
+            for (var x = sideLength - 1; x >= 0; x = x - pixelsPerModule)
             {
                 for (int pm = 0; pm < pixelsPerModule; pm++)
                 {
                     for (var y = 0; y < sideLength; y = y + pixelsPerModule)
                     {
                         var module =
-                            this.QrCodeData.ModuleMatrix[(x + pixelsPerModule)/pixelsPerModule - 1][(y + pixelsPerModule)/pixelsPerModule - 1];
+                            this.QrCodeData.ModuleMatrix[(x + pixelsPerModule) / pixelsPerModule - 1][(y + pixelsPerModule) / pixelsPerModule - 1];
                         for (int i = 0; i < pixelsPerModule; i++)
                         {
                             bmp.AddRange(module ? moduleDark : moduleLight);
                         }
                     }
-                    if (sideLength%4 != 0)
+                    if (sideLength % 4 != 0)
                     {
-                        for (int i = 0; i < sideLength%4; i++)
+                        for (int i = 0; i < sideLength % 4; i++)
                         {
                             bmp.Add(0x00);
                         }
@@ -77,7 +77,7 @@ namespace Steeltype.QRCoderLite
                 colorString = colorString.Substring(1);
             byte[] byteColor = new byte[colorString.Length / 2];
             for (int i = 0; i < byteColor.Length; i++)
-                byteColor[i] = byte.Parse(colorString.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);            
+                byteColor[i] = byte.Parse(colorString.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
             return byteColor;
         }
 
@@ -92,7 +92,7 @@ namespace Steeltype.QRCoderLite
             return bytes;
         }
     }
-    
+
     public static class BitmapByteQRCodeHelper
     {
         public static byte[] GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex,

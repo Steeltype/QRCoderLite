@@ -126,7 +126,7 @@ namespace Steeltype.QRCoderLite
             int version = requestedVersion;
             if (version == -1)
             {
-                version = GetVersion(dataInputLength+(eciMode != EciMode.Default?2:0), encoding, eccLevel);
+                version = GetVersion(dataInputLength + (eciMode != EciMode.Default ? 2 : 0), encoding, eccLevel);
             }
             else
             {
@@ -137,7 +137,7 @@ namespace Steeltype.QRCoderLite
                     var maxSizeByte = capacityTable[version - 1].Details.First(x => x.ErrorCorrectionLevel == eccLevel).CapacityDict[encoding];
 
                     throw new ArgumentOutOfRangeException($"The chosen version ({version}) is too small to hold the data. The minimum version required is {minVersion} for the given data length. The maximum data length for version {version} is {maxSizeByte} bytes.");
-                }                    
+                }
             }
 
             string modeIndicator = String.Empty;
@@ -482,7 +482,7 @@ namespace Steeltype.QRCoderLite
                 var size = qrCode.ModuleMatrix.Count;
                 var up = true;
                 var datawords = new Queue<bool>();
-                for (int i = 0; i< data.Length; i++)
+                for (int i = 0; i < data.Length; i++)
                 {
                     datawords.Enqueue(data[i] != '0');
                 }
@@ -797,9 +797,9 @@ namespace Steeltype.QRCoderLite
                                 blackModules++;
 
                     var percent = (blackModules / (qrCode.ModuleMatrix.Count * qrCode.ModuleMatrix.Count)) * 100;
-                    var prevMultipleOf5 = Math.Abs((int) Math.Floor(percent/5)*5 - 50)/5;
-                    var nextMultipleOf5 = Math.Abs((int)Math.Floor(percent / 5) * 5 -45)/5;
-                    score4 = Math.Min(prevMultipleOf5, nextMultipleOf5)*10;
+                    var prevMultipleOf5 = Math.Abs((int)Math.Floor(percent / 5) * 5 - 50) / 5;
+                    var nextMultipleOf5 = Math.Abs((int)Math.Floor(percent / 5) * 5 - 45) / 5;
+                    score4 = Math.Min(prevMultipleOf5, nextMultipleOf5) * 10;
 
                     return score1 + score2 + score3 + score4;
                 }
@@ -819,7 +819,7 @@ namespace Steeltype.QRCoderLite
 
             for (var i = 0; i < generatorPolynom.PolyItems.Count; i++)
                 generatorPolynom.PolyItems[i] = new PolynomItem(generatorPolynom.PolyItems[i].Coefficient,
-                    generatorPolynom.PolyItems[i].Exponent + (messagePolynom.PolyItems.Count-1));
+                    generatorPolynom.PolyItems[i].Exponent + (messagePolynom.PolyItems.Count - 1));
 
             var leadTermSource = messagePolynom;
             for (var i = 0; (leadTermSource.PolyItems.Count > 0 && leadTermSource.PolyItems[leadTermSource.PolyItems.Count - 1].Exponent > 0); i++)
@@ -1023,13 +1023,13 @@ namespace Steeltype.QRCoderLite
         {
             var bytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(input);
             //var result = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
-            var result = Encoding.GetEncoding("ISO-8859-1").GetString(bytes,0,bytes.Length);
+            var result = Encoding.GetEncoding("ISO-8859-1").GetString(bytes, 0, bytes.Length);
             return String.Equals(input, result);
         }
 
         private static string PlainTextToBinary(string plainText, EncodingMode encMode, EciMode eciMode, bool utf8BOM, bool forceUtf8)
         {
-            switch(encMode)
+            switch (encMode)
             {
                 case EncodingMode.Alphanumeric:
                     return PlainTextToBinaryAlphanumeric(plainText);
@@ -1090,7 +1090,7 @@ namespace Steeltype.QRCoderLite
         {
             var codeText = string.Empty;
             byte[] _bytes = Encoding.GetEncoding("ascii").GetBytes(plainText);
-            foreach(byte _byte in _bytes)
+            foreach (byte _byte in _bytes)
             {
                 codeText += DecToBin(_byte, 8);
             }
@@ -1115,7 +1115,7 @@ namespace Steeltype.QRCoderLite
                 codeBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(plainText);
             else
             {
-                switch(eciMode)
+                switch (eciMode)
                 {
                     case EciMode.Iso8859_1:
                         codeBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(ConvertToIso8859(plainText, "ISO-8859-1"));

@@ -1,7 +1,5 @@
-﻿using System.Drawing.Imaging;
+﻿using SkiaSharp;
 using System.Globalization;
-using System.Text;
-using SkiaSharp;
 using static Steeltype.QRCoderLite.QRCodeGenerator;
 
 /* This renderer is inspired by RemusVasii: https://github.com/codebude/QRCoder/issues/223 */
@@ -63,7 +61,7 @@ namespace Steeltype.QRCoderLite
             using (var qrCode = new PngByteQRCode(QrCodeData))
             {
                 pngArray = qrCode.GetGraphic(pixelsPerModule, HexColorToByteArray(darkColorHtmlHex), HexColorToByteArray(lightColorHtmlHex));
-            }            
+            }
 
             // Convert PNG byte array to SKBitmap
             SKBitmap bitmap;
@@ -208,7 +206,7 @@ namespace Steeltype.QRCoderLite
             }
         }
     }
-    
+
     public static class PdfByteQRCodeHelper
     {
         public static byte[] GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex,

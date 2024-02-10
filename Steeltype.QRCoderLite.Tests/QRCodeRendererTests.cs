@@ -49,7 +49,7 @@ namespace Steeltype.QRCoderLite.Tests
         [Fact]
         [Category("QRRenderer/QRCode")]
         public void can_create_qrcode_with_transparent_logo_graphic()
-        {        
+        {
             //Create QR code
             var gen = new QRCodeGenerator();
             var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.H);
