@@ -1,42 +1,19 @@
-# QRCoder
-
-|Build|Code coverage|Build status|NuGet Package|
-|-----|-------------|------------|-------------|
-|Latest / Stable|[![codecov](https://codecov.io/gh/codebude/QRCoder/branch/master/graph/badge.svg?token=3yNs88KD8S)](https://codecov.io/gh/codebude/QRCoder)|[![Build, test, pack, push (Release)](https://github.com/codebude/QRCoder/actions/workflows/wf-build-release.yml/badge.svg?branch=master)](https://github.com/codebude/QRCoder/actions/workflows/wf-build-release.yml)|[![NuGet Badge](https://buildstats.info/nuget/QRCoder?rnd=0892982314)](https://www.nuget.org/packages/QRCoder/)|
-|CI / Last commit|[![codecov](https://codecov.io/gh/codebude/QRCoder/branch/master/graph/badge.svg?token=3yNs88KD8S)](https://codecov.io/gh/codebude/QRCoder)|[![Build, test, pack, push (CI)](https://github.com/codebude/QRCoder/actions/workflows/wf-build-release-ci.yml/badge.svg)](https://github.com/codebude/QRCoder/actions/workflows/wf-build-release-ci.yml)|[![Github packages](https://img.shields.io/badge/Github-Packages-blue)](https://github.com/codebude/qrcoder/packages)|
-
+# QRCoderLite
 
 ## Info
 
-QRCoder is a simple library, written in C#.NET, which enables you to create QR codes. It hasn't any dependencies to other libraries and is available as .NET Framework and .NET Core PCL version on NuGet.
+QRCoderLite is a simple library, written in C#.NET, which enables you to create QR codes. It is a derivative of the popular QRCoder (https://github.com/codebude/QRCoder) library, and QRCoderLite aims for a smaller and easier to audit footprint, limited functionality, and net8 compatibility. Unlike QRCoder, it depends on the Mono SkiaSharp library (https://github.com/mono/SkiaSharp) for platform-specific graphics implementations.
 
-Feel free to grab-up/fork the project and make it better!
+Please be forewarned that this project will receive limited support and may be out-of-date in the near future. However, the project is intended to be a minimal implementation that will be easier to port to new frameworks in the future.
 
-For more information see:
-[**QRCode Wiki**](https://github.com/codebude/QRCoder/wiki) | [Creator's blog (english)](http://en.code-bude.net/2013/10/17/qrcoder-an-open-source-qr-code-generator-implementation-in-csharp/) | [Creator's blog (german)](http://code-bude.net/2013/10/17/qrcoder-eine-open-source-qr-code-implementierung-in-csharp/)
-
-### Release Notes
-The release notes for the current and all past releases can be read here: [📄 Release Notes](https://github.com/codebude/QRCoder/wiki/Release-notes)
+As with the original QRCoder library, please feel free to grab-up/fork the project and make it better!
 
 ## Legal information and credits
 
-QRCoder is a project by [Raffael Herrmann](https://raffaelherrmann.de) and was first released in 10/2013. It's licensed under the [MIT license](https://github.com/codebude/QRCoder/blob/master/LICENSE.txt).
+QRCoderLite is a project by Steeltype LLC in February 2024 under the [BSD-3-Clause](https://opensource.org/license/bsd-3-clause/) license. The original QRCoder library from which it is derived is under the MIT license courtesy of Raffael Herrmann.
 
 
 * * *
-
-
-## Installation
-
-Either checkout this Github repository or install QRCoder via NuGet Package Manager. If you want to use NuGet just search for "QRCoder" or run the following command in the NuGet Package Manager console:
-```bash
-PM> Install-Package QRCoder
-```
-
-#### CI builds
-The NuGet feed contains only **major/stable** releases. If you want the latest functions and features, you can use the CI builds [via Github packages](https://github.com/codebude/qrcoder/packages).
-_(More information on how to use Github Packages in Nuget Package Manager can be [found here](http://webcache.googleusercontent.com/search?q=cache:i_gL6oIwpr8J:www.catiawidgets.net/2021/04/20/creating-github-packages-and-accessing-them-in-nuget/+&cd=1&hl=de&ct=clnk&gl=de).)_
-
 
 ## Usage
 
