@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Numerics;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -875,7 +876,7 @@ namespace Steeltype.QRCoderLite
                 {
                     if (ibanType == IbanType.Iban && !IsValidIban(iban))
                         throw new SwissQrCodeIbanException("The IBAN entered isn't valid.");
-                    if (ibanType == IbanType.QrIban && !IsValidQrIban(iban))
+                    if (ibanType == IbanType.QrIban && !IsValidQRIban(iban))
                         throw new SwissQrCodeIbanException("The QR-IBAN entered isn't valid.");
                     if (!iban.StartsWith("CH") && !iban.StartsWith("LI"))
                         throw new SwissQrCodeIbanException("The IBAN must start with \"CH\" or \"LI\".");
@@ -1358,12 +1359,12 @@ namespace Steeltype.QRCoderLite
                 //Loaded via "contact-constructor"
                 if (internalMode == 1)
                 {
-                    if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
+                    if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
                         throw new BezahlCodeException("The constructor without an amount may only ne used with authority types 'contact' and 'contact_v2'.");
-                    if (authority == AuthorityType.Contact && (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(bnc)))
+                    if (authority == AuthorityType.contact && (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(bnc)))
                         throw new BezahlCodeException("When using authority type 'contact' the parameters 'account' and 'bnc' must be set.");
 
-                    if (authority != AuthorityType.ContactV2)
+                    if (authority != AuthorityType.contact_v2)
                     {
                         var oldFilled = (!string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(bnc));
                         var newFilled = (!string.IsNullOrEmpty(iban) && !string.IsNullOrEmpty(bic));
@@ -1374,17 +1375,17 @@ namespace Steeltype.QRCoderLite
                 else if (internalMode == 2)
                 {
 #pragma warning disable CS0612
-                    if (authority != AuthorityType.Periodicsinglepayment && authority != AuthorityType.Singledirectdebit && authority != AuthorityType.Singlepayment)
+                    if (authority != AuthorityType.periodicsinglepayment && authority != AuthorityType.singledirectdebit && authority != AuthorityType.singlepayment)
                         throw new BezahlCodeException("The constructor with 'account' and 'bnc' may only be used with 'non SEPA' authority types. Either choose another authority type or switch constructor.");
-                    if (authority == AuthorityType.Periodicsinglepayment && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
+                    if (authority == AuthorityType.periodicsinglepayment && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
                         throw new BezahlCodeException("When using 'periodicsinglepayment' as authority type, the parameters 'periodicTimeunit' and 'periodicTimeunitRotation' must be set.");
 #pragma warning restore CS0612
                 }
                 else if (internalMode == 3)
                 {
-                    if (authority != AuthorityType.Periodicsinglepaymentsepa && authority != AuthorityType.Singledirectdebitsepa && authority != AuthorityType.Singlepaymentsepa)
+                    if (authority != AuthorityType.periodicsinglepaymentsepa && authority != AuthorityType.singledirectdebitsepa && authority != AuthorityType.singlepaymentsepa)
                         throw new BezahlCodeException("The constructor with 'iban' and 'bic' may only be used with 'SEPA' authority types. Either choose another authority type or switch constructor.");
-                    if (authority == AuthorityType.Periodicsinglepaymentsepa && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
+                    if (authority == AuthorityType.periodicsinglepaymentsepa && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
                         throw new BezahlCodeException("When using 'periodicsinglepaymentsepa' as authority type, the parameters 'periodicTimeunit' and 'periodicTimeunitRotation' must be set.");
                 }
 
@@ -1403,7 +1404,7 @@ namespace Steeltype.QRCoderLite
 
                 //Non-SEPA payment types
 #pragma warning disable CS0612
-                if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Singledirectdebit || authority == AuthorityType.Singlepayment || authority == AuthorityType.Contact || (authority == AuthorityType.ContactV2 && oldWayFilled))
+                if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.singledirectdebit || authority == AuthorityType.singlepayment || authority == AuthorityType.contact || (authority == AuthorityType.contact_v2 && oldWayFilled))
                 {
 #pragma warning restore CS0612
                     if (!Regex.IsMatch(account.Replace(" ", ""), @"^[0-9]{1,9}$"))
@@ -1413,7 +1414,7 @@ namespace Steeltype.QRCoderLite
                         throw new BezahlCodeException("The bnc entered isn't valid.");
                     this.bnc = bnc.Replace(" ", "").ToUpper();
 
-                    if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
+                    if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
                     {
                         if (postingKey < 0 || postingKey >= 100)
                             throw new BezahlCodeException("PostingKey must be within 0 and 99.");
@@ -1422,7 +1423,7 @@ namespace Steeltype.QRCoderLite
                 }
 
                 //SEPA payment types
-                if (authority == AuthorityType.Periodicsinglepaymentsepa || authority == AuthorityType.Singledirectdebitsepa || authority == AuthorityType.Singlepaymentsepa || (authority == AuthorityType.ContactV2 && newWayFilled))
+                if (authority == AuthorityType.periodicsinglepaymentsepa || authority == AuthorityType.singledirectdebitsepa || authority == AuthorityType.singlepaymentsepa || (authority == AuthorityType.contact_v2 && newWayFilled))
                 {
                     if (!IsValidIban(iban))
                         throw new BezahlCodeException("The IBAN entered isn't valid.");
@@ -1431,7 +1432,7 @@ namespace Steeltype.QRCoderLite
                         throw new BezahlCodeException("The BIC entered isn't valid.");
                     this.bic = bic.Replace(" ", "").ToUpper();
 
-                    if (authority != AuthorityType.ContactV2)
+                    if (authority != AuthorityType.contact_v2)
                     {
                         if (sepaReference.Length > 35)
                             throw new BezahlCodeException("SEPA reference texts have to be shorter than 36 chars.");
@@ -1449,7 +1450,7 @@ namespace Steeltype.QRCoderLite
                 }
 
                 //Checks for all payment types
-                if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
+                if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
                 {
                     if (amount.ToString().Replace(",", ".").Contains(".") && amount.ToString().Replace(",", ".").Split('.')[1].TrimEnd('0').Length > 2)
                         throw new BezahlCodeException("Amount must have less than 3 digits after decimal point.");
@@ -1468,7 +1469,7 @@ namespace Steeltype.QRCoderLite
                         this.executionDate = (DateTime)executionDate;
                     }
 #pragma warning disable CS0612
-                    if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Periodicsinglepaymentsepa)
+                    if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.periodicsinglepaymentsepa)
 #pragma warning restore CS0612
                     {
                         if (periodicTimeunit.ToUpper() != "M" && periodicTimeunit.ToUpper() != "W")
@@ -1495,11 +1496,11 @@ namespace Steeltype.QRCoderLite
 
                 bezahlCodePayload += $"name={Uri.EscapeDataString(name)}&";
 
-                if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
+                if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
                 {
                     //Handle what is same for all payments
 #pragma warning disable CS0612
-                    if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Singledirectdebit || authority == AuthorityType.Singlepayment)
+                    if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.singledirectdebit || authority == AuthorityType.singlepayment)
 #pragma warning restore CS0612
                     {
                         bezahlCodePayload += $"account={account}&";
@@ -1515,7 +1516,7 @@ namespace Steeltype.QRCoderLite
                         if (!string.IsNullOrEmpty(sepaReference))
                             bezahlCodePayload += $"separeference={Uri.EscapeDataString(sepaReference)}&";
 
-                        if (authority == AuthorityType.Singledirectdebitsepa)
+                        if (authority == AuthorityType.singledirectdebitsepa)
                         {
                             if (!string.IsNullOrEmpty(creditorId))
                                 bezahlCodePayload += $"creditorid={Uri.EscapeDataString(creditorId)}&";
@@ -1532,7 +1533,7 @@ namespace Steeltype.QRCoderLite
                     bezahlCodePayload += $"currency={currency}&";
                     bezahlCodePayload += $"executiondate={executionDate.ToString("ddMMyyyy")}&";
 #pragma warning disable CS0612
-                    if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Periodicsinglepaymentsepa)
+                    if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.periodicsinglepaymentsepa)
                     {
                         bezahlCodePayload += $"periodictimeunit={periodicTimeunit}&";
                         bezahlCodePayload += $"periodictimeunitrotation={periodicTimeunitRotation}&";
@@ -1546,12 +1547,12 @@ namespace Steeltype.QRCoderLite
                 else
                 {
                     //Handle what is same for all contacts
-                    if (authority == AuthorityType.Contact)
+                    if (authority == AuthorityType.contact)
                     {
                         bezahlCodePayload += $"account={account}&";
                         bezahlCodePayload += $"bnc={bnc}&";
                     }
-                    else if (authority == AuthorityType.ContactV2)
+                    else if (authority == AuthorityType.contact_v2)
                     {
                         if (!string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(bnc))
                         {
@@ -1760,6 +1761,7 @@ namespace Steeltype.QRCoderLite
 
             /// <summary>
             /// Operation modes of the BezahlCode
+            /// WARNING: DO NOT RENAME THESE OR IT BREAKS AN ENCODING FUNCTION ELSEWHERE THAT KEYS OFF THE VARIABLE NAMES VIA REFLECTION
             /// </summary>
             public enum AuthorityType
             {
@@ -1767,37 +1769,37 @@ namespace Steeltype.QRCoderLite
                 /// Single payment (Überweisung)
                 /// </summary>
                 [Obsolete]
-                Singlepayment,
+                singlepayment,
                 /// <summary>
                 /// Single SEPA payment (SEPA-Überweisung)
                 /// </summary>
-                Singlepaymentsepa,
+                singlepaymentsepa,
                 /// <summary>
                 /// Single debit (Lastschrift)
                 /// </summary>
                 [Obsolete]
-                Singledirectdebit,
+                singledirectdebit,
                 /// <summary>
                 /// Single SEPA debit (SEPA-Lastschrift)
                 /// </summary>
-                Singledirectdebitsepa,
+                singledirectdebitsepa,
                 /// <summary>
                 /// Periodic payment (Dauerauftrag)
                 /// </summary>
                 [Obsolete]
-                Periodicsinglepayment,
+                periodicsinglepayment,
                 /// <summary>
                 /// Periodic SEPA payment (SEPA-Dauerauftrag)
                 /// </summary>
-                Periodicsinglepaymentsepa,
+                periodicsinglepaymentsepa,
                 /// <summary>
                 /// Contact data
                 /// </summary>
-                Contact,
+                contact,
                 /// <summary>
                 /// Contact data V2
                 /// </summary>
-                ContactV2
+                contact_v2
             }
 
             public class BezahlCodeException : Exception
@@ -2410,7 +2412,7 @@ namespace Steeltype.QRCoderLite
             /// <param name="correspAcc">Box number / account payee's bank (Номер кор./сч. банка получателя платежа)</param>
             /// <param name="optionalFields">An (optional) object of additional fields</param>
             /// <param name="characterSet">Type of encoding (default UTF-8)</param>
-            public RussiaPaymentOrder(string name, string personalAcc, string bankName, string BIC, string correspAcc, OptionalFields optionalFields = null, CharacterSets characterSet = CharacterSets.Utf8) : this()
+            public RussiaPaymentOrder(string name, string personalAcc, string bankName, string BIC, string correspAcc, OptionalFields optionalFields = null, CharacterSets characterSet = CharacterSets.utf_8) : this()
             {
                 this.characterSet = characterSet;
                 mFields.Name = ValidateInput(name, "Name", @"^.{1,160}$");
@@ -2445,32 +2447,41 @@ namespace Steeltype.QRCoderLite
 
             public byte[] ToBytes()
             {
-                //Calculate the separator
+                // Calculate the separator
                 separator = DetermineSeparator();
 
-                //Create the payload string
-                var ret = $"ST0001" + ((int)characterSet) + //(separator != "|" ? separator : "") + 
-                          $"{separator}Name={mFields.Name}" +
-                          $"{separator}PersonalAcc={mFields.PersonalAcc}" +
-                          $"{separator}BankName={mFields.BankName}" +
-                          $"{separator}BIC={mFields.BIC}" +
-                          $"{separator}CorrespAcc={mFields.CorrespAcc}";
+                // Create the payload string, appending fields directly without unnecessary conditional logic for the separator
+                var payload = $"ST0001{(int)characterSet}{separator}" +
+                              $"Name={mFields.Name}{separator}" +
+                              $"PersonalAcc={mFields.PersonalAcc}{separator}" +
+                              $"BankName={mFields.BankName}{separator}" +
+                              $"BIC={mFields.BIC}{separator}" +
+                              $"CorrespAcc={mFields.CorrespAcc}";
 
-                //Add optional fields, if filled
+                // Add optional fields, if any are present
                 var optionalFieldsList = GetOptionalFieldsAsList();
-                if (optionalFieldsList.Count > 0)
-                    ret += $"|{string.Join("|", optionalFieldsList.ToArray())}";
-                ret += separator;
+                if (optionalFieldsList.Any())
+                {
+                    payload += $"{separator}{string.Join(separator, optionalFieldsList)}";
+                }
+    
+                // Ensure the payload ends with a separator
+                payload += separator;
 
-                //Encode return string as byte[] with correct CharacterSet
+                // Encode return string as byte[] with the correct CharacterSet
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                var cp = characterSet.ToString().Replace("_", "-");
-                var bytesOut = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(cp), Encoding.UTF8.GetBytes(ret));
+                var encodingPageName = characterSet.ToString().Replace("_", "-");
+                var encoding = Encoding.GetEncoding(encodingPageName);
+                var bytesOut = encoding.GetBytes(payload);
+
+                // Check if the byte array exceeds the maximum allowed length
                 if (bytesOut.Length > 300)
+                {
                     throw new RussiaPaymentOrderException($"Data too long. Payload must not exceed 300 bytes, but actually is {bytesOut.Length} bytes long. Remove additional data fields or shorten strings/values.");
+                }
+
                 return bytesOut;
             }
-
 
             /// <summary>
             /// Determines a valid separator
@@ -2932,11 +2943,12 @@ namespace Steeltype.QRCoderLite
                 Прочие_услуги = 15 // Other services
             }
 
+            // WARNING: DO NOT RENAME THESE OR IT BREAKS AN ENCODING FUNCTION ELSEWHERE THAT KEYS OFF THE VARIABLE NAMES VIA REFLECTION
             public enum CharacterSets
             {
-                Windows1251 = 1,       // Encoding.GetEncoding("windows-1251")
-                Utf8 = 2,              // Encoding.UTF8                          
-                Koi8R = 3              // Encoding.GetEncoding("koi8-r")
+                windows_1251 = 1,       // Encoding.GetEncoding("windows-1251")
+                utf_8 = 2,              // Encoding.UTF8                          
+                koi8_r = 3              // Encoding.GetEncoding("koi8-r")
             }
 
             public class RussiaPaymentOrderException : Exception
@@ -2979,22 +2991,32 @@ namespace Steeltype.QRCoderLite
 
         private static int CalculateIbanChecksum(string numericIban)
         {
-            var remainder = 0;
+            BigInteger remainder = 0;
             var position = 0;
 
             // Process the numeric IBAN in chunks to avoid overflow issues.
             while (position < numericIban.Length)
             {
-                var length = Math.Min(numericIban.Length - position, 9); // Take chunks of up to 9 digits to fit in an int.
-                var number = int.Parse(remainder + numericIban.Substring(position, length), CultureInfo.InvariantCulture);
-                remainder = number % 97; // Modulo 97 operation.
+                // Determine the length of the next chunk.
+                var length = Math.Min(numericIban.Length - position, 9); // Take chunks of up to 9 digits.
+        
+                // Convert the chunk (along with any remainder from the previous chunk) to a BigInteger.
+                var chunk = numericIban.Substring(position, length);
+                var number = BigInteger.Parse(remainder.ToString() + chunk, CultureInfo.InvariantCulture);
+        
+                // Perform the modulo 97 operation on the large integer.
+                remainder = number % 97;
+        
+                // Move to the next chunk.
                 position += length;
             }
 
-            return remainder;
+            // The final remainder is the checksum.
+            return (int)remainder;
         }
 
-        private static bool IsValidQrIban(string iban)
+
+        private static bool IsValidQRIban(string iban)
         {
             var foundQrIid = false;
             try
