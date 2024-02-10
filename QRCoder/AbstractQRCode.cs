@@ -1,4 +1,4 @@
-﻿namespace QRCoder
+﻿namespace Steeltype.QRCoderLite
 {
     public abstract class AbstractQRCode
     {

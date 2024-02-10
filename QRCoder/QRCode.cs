@@ -1,14 +1,7 @@
-#if NETFRAMEWORK || NETSTANDARD2_0 || NET5_0 || NET6_0_WINDOWS
-using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using static QRCoder.QRCodeGenerator;
+using SkiaSharp;
 
-namespace QRCoder
+namespace Steeltype.QRCoderLite
 {
-#if NET6_0_WINDOWS
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
     public class QRCode : AbstractQRCode, IDisposable
     {
         /// <summary>
@@ -18,129 +11,141 @@ namespace QRCoder
 
         public QRCode(QRCodeData data) : base(data) {}
 
-        public Bitmap GetGraphic(int pixelsPerModule)
+        public SKBitmap GetGraphic(int pixelsPerModule)
         {
-            return this.GetGraphic(pixelsPerModule, Color.Black, Color.White, true);
+            // Defaulting to black and white colors using SkiaSharp's color representation
+            return this.GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, true);
         }
 
-        public Bitmap GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, bool drawQuietZones = true)
+        public SKBitmap GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, bool drawQuietZones = true)
         {
-            return this.GetGraphic(pixelsPerModule, ColorTranslator.FromHtml(darkColorHtmlHex), ColorTranslator.FromHtml(lightColorHtmlHex), drawQuietZones);
+            // Convert HTML hex color strings to SKColor
+            SKColor.TryParse(darkColorHtmlHex, out SKColor darkColor);
+            SKColor.TryParse(lightColorHtmlHex, out SKColor lightColor);
+
+            // Call the main GetGraphic method with SKColor parameters
+            return this.GetGraphic(pixelsPerModule, darkColor, lightColor, drawQuietZones);
         }
 
-        public Bitmap GetGraphic(int pixelsPerModule, Color darkColor, Color lightColor, bool drawQuietZones = true)
+        public SKBitmap GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, bool drawQuietZones = true)
         {
             var size = (this.QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
             var offset = drawQuietZones ? 0 : 4 * pixelsPerModule;
 
-            var bmp = new Bitmap(size, size);
-            using (var gfx = Graphics.FromImage(bmp))
-            using (var lightBrush = new SolidBrush(lightColor))
-            using (var darkBrush = new SolidBrush(darkColor))
-            {
-                for (var x = 0; x < size + offset; x = x + pixelsPerModule)
-                {
-                    for (var y = 0; y < size + offset; y = y + pixelsPerModule)
-                    {
-                        var module = this.QrCodeData.ModuleMatrix[(y + pixelsPerModule) / pixelsPerModule - 1][(x + pixelsPerModule) / pixelsPerModule - 1];
+            var bmp = new SKBitmap(size, size);
+            using var canvas = new SKCanvas(bmp);
+            canvas.Clear(lightColor); // Set the background color
 
-                        if (module)
-                        {
-                            gfx.FillRectangle(darkBrush, new Rectangle(x - offset, y - offset, pixelsPerModule, pixelsPerModule));
-                        }
-                        else
-                        {
-                            gfx.FillRectangle(lightBrush, new Rectangle(x - offset, y - offset, pixelsPerModule, pixelsPerModule));
-                        }
+            var lightPaint = new SKPaint { Color = lightColor };
+            var darkPaint = new SKPaint { Color = darkColor };
+
+            for (var x = 0; x < size + offset; x += pixelsPerModule)
+            {
+                for (var y = 0; y < size + offset; y += pixelsPerModule)
+                {
+                    var module = this.QrCodeData.ModuleMatrix[(y + pixelsPerModule) / pixelsPerModule - 1][(x + pixelsPerModule) / pixelsPerModule - 1];
+                    var rect = new SKRect(x - offset, y - offset, x - offset + pixelsPerModule, y - offset + pixelsPerModule);
+
+                    if (module)
+                    {
+                        canvas.DrawRect(rect, darkPaint);
+                    }
+                    else
+                    {
+                        canvas.DrawRect(rect, lightPaint);
                     }
                 }
-
-                gfx.Save();
             }
 
             return bmp;
         }
 
-        public Bitmap GetGraphic(int pixelsPerModule, Color darkColor, Color lightColor, Bitmap icon=null, int iconSizePercent=15, int iconBorderWidth = 0, bool drawQuietZones = true, Color? iconBackgroundColor = null)
+        public SKBitmap GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKBitmap icon = null, int iconSizePercent = 15, int iconBorderWidth = 0, bool drawQuietZones = true, SKColor? iconBackgroundColor = null)
         {
             var size = (this.QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
             var offset = drawQuietZones ? 0 : 4 * pixelsPerModule;
 
-            var bmp = new Bitmap(size, size, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            var bmp = new SKBitmap(size, size);
+            using var canvas = new SKCanvas(bmp);
+            canvas.Clear(lightColor);
 
-            using (var gfx = Graphics.FromImage(bmp))
-            using (var lightBrush = new SolidBrush(lightColor))
-            using (var darkBrush = new SolidBrush(darkColor))
+            var lightPaint = new SKPaint { Color = lightColor };
+            var darkPaint = new SKPaint { Color = darkColor };
+
+            for (var x = 0; x < size + offset; x += pixelsPerModule)
             {
-                gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                gfx.CompositingQuality = CompositingQuality.HighQuality;
-                gfx.Clear(lightColor);
-                var drawIconFlag = icon != null && iconSizePercent > 0 && iconSizePercent <= 100;
-                               
-                for (var x = 0; x < size + offset; x = x + pixelsPerModule)
+                for (var y = 0; y < size + offset; y += pixelsPerModule)
                 {
-                    for (var y = 0; y < size + offset; y = y + pixelsPerModule)
-                    {
-                        var moduleBrush = this.QrCodeData.ModuleMatrix[(y + pixelsPerModule) / pixelsPerModule - 1][(x + pixelsPerModule) / pixelsPerModule - 1] ? darkBrush : lightBrush;
-                        gfx.FillRectangle(moduleBrush , new Rectangle(x - offset, y - offset, pixelsPerModule, pixelsPerModule));
-                    }
+                    var moduleColor = this.QrCodeData.ModuleMatrix[(y + pixelsPerModule) / pixelsPerModule - 1][(x + pixelsPerModule) / pixelsPerModule - 1] ? darkPaint : lightPaint;
+                    canvas.DrawRect(x - offset, y - offset, pixelsPerModule, pixelsPerModule, moduleColor);
+                }
+            }
+
+            if (icon != null && iconSizePercent > 0 && iconSizePercent <= 100)
+            {
+                var iconDestWidth = iconSizePercent * bmp.Width / 100f;
+                var iconDestHeight = iconDestWidth * icon.Height / icon.Width;
+                var iconX = (bmp.Width - iconDestWidth) / 2;
+                var iconY = (bmp.Height - iconDestHeight) / 2;
+
+                if (iconBorderWidth > 0 && iconBackgroundColor.HasValue)
+                {
+                    var centerDest = new SKRect(iconX - iconBorderWidth, iconY - iconBorderWidth, iconX + iconDestWidth + iconBorderWidth, iconY + iconDestHeight + iconBorderWidth);
+                    var iconBgPaint = new SKPaint { Color = iconBackgroundColor.Value, IsAntialias = true };
+                    var iconPath = CreateRoundedRectanglePath(centerDest, iconBorderWidth * 2);
+                    canvas.DrawPath(iconPath, iconBgPaint);
                 }
 
-                if (drawIconFlag)
-                {
-                    float iconDestWidth = iconSizePercent * bmp.Width / 100f;
-                    float iconDestHeight = drawIconFlag ? iconDestWidth * icon.Height / icon.Width : 0;
-                    float iconX = (bmp.Width - iconDestWidth) / 2;
-                    float iconY = (bmp.Height - iconDestHeight) / 2;
-                    var centerDest = new RectangleF(iconX - iconBorderWidth, iconY - iconBorderWidth, iconDestWidth + iconBorderWidth * 2, iconDestHeight + iconBorderWidth * 2);
-                    var iconDestRect = new RectangleF(iconX, iconY, iconDestWidth, iconDestHeight);
-                    var iconBgBrush = iconBackgroundColor != null ? new SolidBrush((Color)iconBackgroundColor) : lightBrush;
-                    //Only render icon/logo background, if iconBorderWith is set > 0
-                    if (iconBorderWidth > 0)
-                    {                        
-                        using (GraphicsPath iconPath = CreateRoundedRectanglePath(centerDest, iconBorderWidth * 2))
-                        {                            
-                            gfx.FillPath(iconBgBrush, iconPath);
-                        }
-                    }
-                    gfx.DrawImage(icon, iconDestRect, new RectangleF(0, 0, icon.Width, icon.Height), GraphicsUnit.Pixel);
-                }
-
-                gfx.Save();
+                // Draw the icon
+                SKRect iconDestRect = new SKRect(iconX, iconY, iconX + iconDestWidth, iconY + iconDestHeight);
+                canvas.DrawBitmap(icon, new SKRect(0, 0, icon.Width, icon.Height), iconDestRect, null);
             }
 
             return bmp;
         }
 
-        internal GraphicsPath CreateRoundedRectanglePath(RectangleF rect, int cornerRadius)
+        private SKPath CreateRoundedRectanglePath(SKRect rect, float cornerRadius)
         {
-            var roundedRect = new GraphicsPath();
-            roundedRect.AddArc(rect.X, rect.Y, cornerRadius * 2, cornerRadius * 2, 180, 90);
-            roundedRect.AddLine(rect.X + cornerRadius, rect.Y, rect.Right - cornerRadius * 2, rect.Y);
-            roundedRect.AddArc(rect.X + rect.Width - cornerRadius * 2, rect.Y, cornerRadius * 2, cornerRadius * 2, 270, 90);
-            roundedRect.AddLine(rect.Right, rect.Y + cornerRadius * 2, rect.Right, rect.Y + rect.Height - cornerRadius * 2);
-            roundedRect.AddArc(rect.X + rect.Width - cornerRadius * 2, rect.Y + rect.Height - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 0, 90);
-            roundedRect.AddLine(rect.Right - cornerRadius * 2, rect.Bottom, rect.X + cornerRadius * 2, rect.Bottom);
-            roundedRect.AddArc(rect.X, rect.Bottom - cornerRadius * 2, cornerRadius * 2, cornerRadius * 2, 90, 90);
-            roundedRect.AddLine(rect.X, rect.Bottom - cornerRadius * 2, rect.X, rect.Y + cornerRadius * 2);
-            roundedRect.CloseFigure();
+            var roundedRect = new SKPath();
+
+            // Top left corner
+            roundedRect.MoveTo(rect.Left + cornerRadius, rect.Top);
+            roundedRect.ArcTo(cornerRadius, cornerRadius, 0, SKPathArcSize.Small, SKPathDirection.Clockwise, rect.Left, rect.Top + cornerRadius);
+
+            // Line to bottom left corner
+            roundedRect.LineTo(rect.Left, rect.Bottom - cornerRadius);
+
+            // Bottom left corner
+            roundedRect.ArcTo(cornerRadius, cornerRadius, 0, SKPathArcSize.Small, SKPathDirection.Clockwise, rect.Left + cornerRadius, rect.Bottom);
+
+            // Line to bottom right corner
+            roundedRect.LineTo(rect.Right - cornerRadius, rect.Bottom);
+
+            // Bottom right corner
+            roundedRect.ArcTo(cornerRadius, cornerRadius, 0, SKPathArcSize.Small, SKPathDirection.Clockwise, rect.Right, rect.Bottom - cornerRadius);
+
+            // Line to top right corner
+            roundedRect.LineTo(rect.Right, rect.Top + cornerRadius);
+
+            // Top right corner
+            roundedRect.ArcTo(cornerRadius, cornerRadius, 0, SKPathArcSize.Small, SKPathDirection.Clockwise, rect.Right - cornerRadius, rect.Top);
+
+            // Closing the path automatically connects back to the start point
+            roundedRect.Close();
+
             return roundedRect;
         }
-    }
 
-#if NET6_0_WINDOWS
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
+    }
+    
     public static class QRCodeHelper
     {
-        public static Bitmap GetQRCode(string plainText, int pixelsPerModule, Color darkColor, Color lightColor, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1, Bitmap icon = null, int iconSizePercent = 15, int iconBorderWidth = 0, bool drawQuietZones = true)
+        public static SKBitmap GetQRCode(string plainText, int pixelsPerModule, SKColor darkColor, SKColor lightColor, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, SKBitmap icon = null, int iconSizePercent = 15, int iconBorderWidth = 0, bool drawQuietZones = true)
         {
-            using (var qrGenerator = new QRCodeGenerator())
-            using (var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion))
-            using (var qrCode = new QRCode(qrCodeData))
-                return qrCode.GetGraphic(pixelsPerModule, darkColor, lightColor, icon, iconSizePercent, iconBorderWidth, drawQuietZones);
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
+            using var qrCode = new QRCode(qrCodeData);
+            return qrCode.GetGraphic(pixelsPerModule, darkColor, lightColor, icon, iconSizePercent, iconBorderWidth, drawQuietZones);
         }
     }
 }
-
-#endif

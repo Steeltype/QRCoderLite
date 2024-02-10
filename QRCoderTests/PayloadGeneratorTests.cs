@@ -1,16 +1,10 @@
-﻿using System;
-using Xunit;
-using QRCoder;
-using Shouldly;
-using System.Globalization;
-using System.Threading;
-using QRCoderTests.Helpers.XUnitExtenstions;
-using static QRCoder.PayloadGenerator.BezahlCode;
-using static QRCoder.PayloadGenerator.SwissQrCode.Reference;
+﻿using System.Globalization;
 using System.Reflection;
-using static QRCoder.PayloadGenerator.SwissQrCode.AdditionalInformation;
+using Shouldly;
+using Steeltype.QRCoderLite.Tests.Helpers;
+using Xunit;
 
-namespace QRCoderTests
+namespace Steeltype.QRCoderLite.Tests
 {
 
     public class PayloadGeneratorTests
@@ -82,13 +76,8 @@ namespace QRCoderTests
         [Category("PayloadGenerator/BitcoinAddress")]
         public void bitcoin_address_generator_disregards_current_culture()
         {
-#if NETCOREAPP1_1
-            var currentCulture = CultureInfo.DefaultThreadCurrentCulture;
-            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("de-DE");
-#else
             var currentCulture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
-#endif
 
             var address = "175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W";
             var amount = .123;
@@ -100,11 +89,7 @@ namespace QRCoderTests
                 .ToString()
                 .ShouldBe("bitcoin:175tWpb8K1S7NmH4Zx6rewF9WQrcZv245W?amount=.123");
 
-#if NETCOREAPP1_1
-            CultureInfo.DefaultThreadCurrentCulture = currentCulture;
-#else
             Thread.CurrentThread.CurrentCulture = currentCulture;
-#endif
         }
 
         [Fact]
@@ -173,13 +158,8 @@ namespace QRCoderTests
         [Category("PayloadGenerator/BitcoinCashAddress")]
         public void bitcoincash_address_generator_disregards_current_culture()
         {
-#if NETCOREAPP1_1
-            var currentCulture = CultureInfo.DefaultThreadCurrentCulture;
-            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("de-DE");
-#else
             var currentCulture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
-#endif
 
             var address = "qqtlfk37qyey50f4wfuhc7jw85zsdp8s2swffjk890";
             var amount = .123;
@@ -191,11 +171,7 @@ namespace QRCoderTests
                 .ToString()
                 .ShouldBe("bitcoincash:qqtlfk37qyey50f4wfuhc7jw85zsdp8s2swffjk890?amount=.123");
 
-#if NETCOREAPP1_1
-            CultureInfo.DefaultThreadCurrentCulture = currentCulture;
-#else
             Thread.CurrentThread.CurrentCulture = currentCulture;
-#endif
         }
 
         [Fact]
@@ -264,13 +240,8 @@ namespace QRCoderTests
         [Category("PayloadGenerator/LitecoinAddress")]
         public void litecoin_address_generator_disregards_current_culture()
         {
-#if NETCOREAPP1_1
-            var currentCulture = CultureInfo.DefaultThreadCurrentCulture;
-            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("de-DE");
-#else
             var currentCulture = Thread.CurrentThread.CurrentCulture;
             Thread.CurrentThread.CurrentCulture = new CultureInfo("de-DE");
-#endif
 
             var address = "LY1t7iLnwtPCb1DPZP38FA835XzFqXBq54";
             var amount = .123;
@@ -282,11 +253,7 @@ namespace QRCoderTests
                 .ToString()
                 .ShouldBe("litecoin:LY1t7iLnwtPCb1DPZP38FA835XzFqXBq54?amount=.123");
 
-#if NETCOREAPP1_1
-            CultureInfo.DefaultThreadCurrentCulture = currentCulture;
-#else
             Thread.CurrentThread.CurrentCulture = currentCulture;
-#endif
         }
 
         [Fact]
@@ -1284,7 +1251,7 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1302,9 +1269,9 @@ namespace QRCoderTests
             var reason = "Thanks for all your efforts";
             var amount = 10.00m;
             var postingKey = 69;
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1322,9 +1289,9 @@ namespace QRCoderTests
             var reason = "Thanks for all your efforts";
             var amount = 10.00m;
             var postingKey = 69;
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singledirectdebit, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebit, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1346,9 +1313,9 @@ namespace QRCoderTests
             var periodicTimeunitRotation = 2;
             var periodicFirstExecutionDate = DateTime.Now;
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1365,7 +1332,7 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
 
             generator
                 .ToString()
@@ -1383,9 +1350,9 @@ namespace QRCoderTests
             var reason = "Thanks for all your efforts";
             var sepaReference = "Fake SEPA reference";
             var amount = 10.00m;
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban, bic, amount, "", 0, null, null, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban, bic, amount, "", 0, null, null, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
 
             generator
                 .ToString()
@@ -1405,9 +1372,9 @@ namespace QRCoderTests
             var mandateId = "987543CB2";
             var sepaReference = "Fake SEPA reference";
             var amount = 10.00m;
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
 
             generator
                 .ToString()
@@ -1429,9 +1396,9 @@ namespace QRCoderTests
             var periodicTimeunitRotation = 1;
             var periodicFirstExecutionDate = DateTime.Now;
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
 
             generator
                 .ToString()
@@ -1447,7 +1414,7 @@ namespace QRCoderTests
             var bnc = "100205000";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.contact, name, account: account, bnc: bnc);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact, name, account: account, bnc: bnc);
 
             generator
                 .ToString()
@@ -1463,7 +1430,7 @@ namespace QRCoderTests
             var bnc = "100205000";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.contact, name, account, bnc, "", "", "New business contact.");
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact, name, account, bnc, "", "", "New business contact.");
 
             generator
                 .ToString()
@@ -1480,7 +1447,7 @@ namespace QRCoderTests
             var bnc = "100205000";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.contact_v2, name, account: account, bnc: bnc);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact_v2, name, account: account, bnc: bnc);
 
             generator
                 .ToString()
@@ -1496,7 +1463,7 @@ namespace QRCoderTests
             var bic = "BFSWDE33BER";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.contact_v2, name, iban: iban, bic: bic);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact_v2, name, iban: iban, bic: bic);
 
             generator
                 .ToString()
@@ -1513,7 +1480,7 @@ namespace QRCoderTests
             var bic = "BFSWDE33BER";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.contact_v2, name, "", "", iban, bic, "A new v2 contact.");
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact_v2, name, "", "", iban, bic, "A new v2 contact.");
 
             generator
                 .ToString()
@@ -1531,7 +1498,7 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1548,7 +1515,7 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1565,7 +1532,7 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
 
             generator
                 .ToString()
@@ -1582,7 +1549,7 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
 
             generator
                 .ToString()
@@ -1599,7 +1566,7 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1615,10 +1582,10 @@ namespace QRCoderTests
             var bnc = "10020 5000";
             var name = "Wikimedia Fördergesellschaft";
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account, bnc, "", "", "New business contact."));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account, bnc, "", "", "New business contact."));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The constructor without an amount may only ne used with authority types 'contact' and 'contact_v2'.");
         }
 
@@ -1631,10 +1598,10 @@ namespace QRCoderTests
             var bic = "BFSWDE33BER";
             var name = "Wikimedia Fördergesellschaft";
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.periodicsinglepaymentsepa, name, iban: iban, bic: bic));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban: iban, bic: bic));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The constructor without an amount may only ne used with authority types 'contact' and 'contact_v2'.");
         }
 
@@ -1648,10 +1615,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, account: account, bnc: bnc, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, account: account, bnc: bnc, amount: amount));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The constructor with 'account' and 'bnc' may only be used with 'non SEPA' authority types. Either choose another authority type or switch constructor.");
         }
 
@@ -1669,12 +1636,12 @@ namespace QRCoderTests
             var periodicTimeunitRotation = 2;
             var periodicFirstExecutionDate = DateTime.Now;
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("When using 'periodicsinglepayment' as authority type, the parameters 'periodicTimeunit' and 'periodicTimeunitRotation' must be set.");
         }
 
@@ -1688,10 +1655,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, iban: iban, bic: bic, amount: amount));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The constructor with 'iban' and 'bic' may only be used with 'SEPA' authority types. Either choose another authority type or switch constructor.");
 
         }
@@ -1710,12 +1677,12 @@ namespace QRCoderTests
             var periodicTimeunitRotation = 0;
             var periodicFirstExecutionDate = DateTime.Now;
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("When using 'periodicsinglepaymentsepa' as authority type, the parameters 'periodicTimeunit' and 'periodicTimeunitRotation' must be set.");
 
         }
@@ -1730,10 +1697,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft has really really really long name, over 71 chars";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("(Payee-)Name must be shorter than 71 chars.");
 
         }
@@ -1749,10 +1716,10 @@ namespace QRCoderTests
             var reason = "A long long long reason text which may resolve in an exception";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount, reason: reason));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount, reason: reason));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("Reasons texts have to be shorter than 28 chars.");
 
         }
@@ -1767,10 +1734,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The account entered isn't valid.");
         }
 
@@ -1784,10 +1751,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The bnc entered isn't valid.");
         }
 
@@ -1802,10 +1769,10 @@ namespace QRCoderTests
             var postingKey = 101;
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount, postingKey: postingKey));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount, postingKey: postingKey));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("PostingKey must be within 0 and 99.");
         }
 
@@ -1819,10 +1786,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The IBAN entered isn't valid.");
 
         }
@@ -1837,10 +1804,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The BIC entered isn't valid.");
 
         }
@@ -1858,12 +1825,12 @@ namespace QRCoderTests
             var mandateId = "987543CB2";
             var sepaReference = "Fake SEPA reference which is also much to long for the reference field.";
             var amount = 10.00m;
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("SEPA reference texts have to be shorter than 36 chars.");
 
         }
@@ -1881,12 +1848,12 @@ namespace QRCoderTests
             var mandateId = "987543CB2";
             var sepaReference = "Fake SEPA reference.";
             var amount = 10.00m;
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The creditorId entered isn't valid.");
         }
 
@@ -1903,12 +1870,12 @@ namespace QRCoderTests
             var mandateId = "ÄÖ987543CB2 1990 2017";
             var sepaReference = "Fake SEPA reference.";
             var amount = 10.00m;
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The mandateId entered isn't valid.");
         }
 
@@ -1921,10 +1888,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.001m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("Amount must have less than 3 digits after decimal point.");
 
         }
@@ -1939,10 +1906,10 @@ namespace QRCoderTests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 1000000000m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("Amount has to at least 0.01 and must be smaller or equal to 999999999.99.");
 
         }
@@ -1959,12 +1926,12 @@ namespace QRCoderTests
             var amount = 10.00m;
             var postingKey = 69;
             var executionDate = new DateTime(2017, 1, 1);
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, executionDate));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, executionDate));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("Execution date must be today or in future.");
         }
 
@@ -1983,12 +1950,12 @@ namespace QRCoderTests
             var periodicTimeunitRotation = 1;
             var periodicFirstExecutionDate = DateTime.Now;
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The periodicTimeunit must be either 'M' (monthly) or 'W' (weekly).");
         }
 
@@ -2007,12 +1974,12 @@ namespace QRCoderTests
             var periodicTimeunitRotation = 128;
             var periodicFirstExecutionDate = DateTime.Now;
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
-            Currency currency = Currency.USD;
+            PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
-            Assert.IsType<BezahlCodeException>(exception);
+            Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
             exception.Message.ShouldBe("The periodicTimeunitRotation must be 1 or greater. (It means repeat the payment every 'periodicTimeunitRotation' weeks/months.");
         }
 
@@ -2022,14 +1989,14 @@ namespace QRCoderTests
         [Category("PayloadGenerator/SwissQrCode.Reference")]
         public void swissqrcode_generator_should_throw_reference_not_allowed()
         {
-            var refType = ReferenceType.NON;
+            var refType = PayloadGenerator.SwissQrCode.Reference.ReferenceType.NON;
             var reference = "1234567890123456";
-            var refTextType = ReferenceTextType.CreditorReferenceIso11649;
+            var refTextType = PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.CreditorReferenceIso11649;
 
             var exception = Record.Exception(() => new PayloadGenerator.SwissQrCode.Reference(refType, reference, refTextType));
 
             Assert.NotNull(exception);
-            Assert.IsType<SwissQrCodeReferenceException>(exception);
+            Assert.IsType<PayloadGenerator.SwissQrCode.Reference.SwissQrCodeReferenceException>(exception);
             exception.Message.ShouldBe("Reference is only allowed when referenceType not equals \"NON\"");
         }
 
@@ -2037,13 +2004,13 @@ namespace QRCoderTests
         [Category("PayloadGenerator/SwissQrCode.Reference")]
         public void swissqrcode_generator_should_throw_missing_reftexttype()
         {
-            var refType = ReferenceType.SCOR;
+            var refType = PayloadGenerator.SwissQrCode.Reference.ReferenceType.SCOR;
             var reference = "1234567890123456";
 
             var exception = Record.Exception(() => new PayloadGenerator.SwissQrCode.Reference(refType, reference));
 
             Assert.NotNull(exception);
-            Assert.IsType<SwissQrCodeReferenceException>(exception);
+            Assert.IsType<PayloadGenerator.SwissQrCode.Reference.SwissQrCodeReferenceException>(exception);
             exception.Message.ShouldBe("You have to set an ReferenceTextType when using the reference text.");
         }
 
@@ -2052,14 +2019,14 @@ namespace QRCoderTests
         [Category("PayloadGenerator/SwissQrCode.Reference")]
         public void swissqrcode_generator_should_throw_qrr_ref_too_long()
         {
-            var refType = ReferenceType.QRR;
+            var refType = PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR;
             var reference = "9900050000000003200710123031234654574398214093682164062138462089364";
-            var refTextType = ReferenceTextType.QrReference;
+            var refTextType = PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference;
 
             var exception = Record.Exception(() => new PayloadGenerator.SwissQrCode.Reference(refType, reference, refTextType));
 
             Assert.NotNull(exception);
-            Assert.IsType<SwissQrCodeReferenceException>(exception);
+            Assert.IsType<PayloadGenerator.SwissQrCode.Reference.SwissQrCodeReferenceException>(exception);
             exception.Message.ShouldBe("QR-references have to be shorter than 28 chars.");
         }
 
@@ -2068,14 +2035,14 @@ namespace QRCoderTests
         [Category("PayloadGenerator/SwissQrCode.Reference")]
         public void swissqrcode_generator_should_throw_qrr_ref_wrong_char()
         {
-            var refType = ReferenceType.QRR;
+            var refType = PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR;
             var reference = "99000ABCDF5000032007101230";
-            var refTextType = ReferenceTextType.QrReference;
+            var refTextType = PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference;
 
             var exception = Record.Exception(() => new PayloadGenerator.SwissQrCode.Reference(refType, reference, refTextType));
 
             Assert.NotNull(exception);
-            Assert.IsType<SwissQrCodeReferenceException>(exception);
+            Assert.IsType<PayloadGenerator.SwissQrCode.Reference.SwissQrCodeReferenceException>(exception);
             exception.Message.ShouldBe("QR-reference must exist out of digits only.");
         }
 
@@ -2084,14 +2051,14 @@ namespace QRCoderTests
         [Category("PayloadGenerator/SwissQrCode.Reference")]
         public void swissqrcode_generator_should_throw_qrr_ref_checksum_invalid()
         {
-            var refType = ReferenceType.QRR;
+            var refType = PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR;
             var reference = "990005000000000320071012304";
-            var refTextType = ReferenceTextType.QrReference;
+            var refTextType = PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference;
 
             var exception = Record.Exception(() => new PayloadGenerator.SwissQrCode.Reference(refType, reference, refTextType));
 
             Assert.NotNull(exception);
-            Assert.IsType<SwissQrCodeReferenceException>(exception);
+            Assert.IsType<PayloadGenerator.SwissQrCode.Reference.SwissQrCodeReferenceException>(exception);
             exception.Message.ShouldBe("QR-references is invalid. Checksum error.");
         }
 
@@ -2100,14 +2067,14 @@ namespace QRCoderTests
         [Category("PayloadGenerator/SwissQrCode.Reference")]
         public void swissqrcode_generator_should_throw_iso11649_ref_too_long()
         {
-            var refType = ReferenceType.QRR;
+            var refType = PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR;
             var reference = "99000500000000032007101230312346545743982162138462089364";
-            var refTextType = ReferenceTextType.CreditorReferenceIso11649;
+            var refTextType = PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.CreditorReferenceIso11649;
 
             var exception = Record.Exception(() => new PayloadGenerator.SwissQrCode.Reference(refType, reference, refTextType));
 
             Assert.NotNull(exception);
-            Assert.IsType<SwissQrCodeReferenceException>(exception);
+            Assert.IsType<PayloadGenerator.SwissQrCode.Reference.SwissQrCodeReferenceException>(exception);
             exception.Message.ShouldBe("Creditor references (ISO 11649) have to be shorter than 26 chars.");
         }
 
@@ -2121,7 +2088,7 @@ namespace QRCoderTests
             var exception = Record.Exception(() => new PayloadGenerator.SwissQrCode.AdditionalInformation(unstructuredMessage, billInformation));
 
             Assert.NotNull(exception);
-            Assert.IsType<SwissQrCodeAdditionalInformationException>(exception);
+            Assert.IsType<PayloadGenerator.SwissQrCode.AdditionalInformation.SwissQrCodeAdditionalInformationException>(exception);
             exception.Message.ShouldBe("Unstructured message and bill information must be shorter than 141 chars in total/combined.");
         }
 
@@ -2477,7 +2444,7 @@ namespace QRCoderTests
         {
             var creditor = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2430043000000789012", PayloadGenerator.SwissQrCode.Iban.IbanType.QrIban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.QRR, "990005000000000320071012303", ReferenceTextType.QrReference);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR, "990005000000000320071012303", PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference);
             var currency = PayloadGenerator.SwissQrCode.Currency.EUR;
 
             var generator = new PayloadGenerator.SwissQrCode(iban, currency, creditor, reference);
@@ -2493,7 +2460,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2430043000000789012", PayloadGenerator.SwissQrCode.Iban.IbanType.QrIban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.QRR, "990005000000000320071012303", ReferenceTextType.QrReference);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR, "990005000000000320071012303", PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference);
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.", "Some bill information here...");
             var amount = 100.25m;
@@ -2513,7 +2480,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2430043000000789012", PayloadGenerator.SwissQrCode.Iban.IbanType.QrIban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.QRR, "990005000000000320071012303", ReferenceTextType.QrReference);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR, "990005000000000320071012303", PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference);
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.");
             var amount = 100.25m;
@@ -2533,7 +2500,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2430043000000789012", PayloadGenerator.SwissQrCode.Iban.IbanType.QrIban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.QRR, "990005000000000320071012303", ReferenceTextType.QrReference);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR, "990005000000000320071012303", PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference);
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.", "Some bill information here...");
             var amount = 100.25m;
@@ -2552,7 +2519,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2609000000857666015", PayloadGenerator.SwissQrCode.Iban.IbanType.Iban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.SCOR, "99000500000000032003", ReferenceTextType.CreditorReferenceIso11649);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.SCOR, "99000500000000032003", PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.CreditorReferenceIso11649);
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.", "Some bill information here...");
             var amount = 1234567.89m;
@@ -2571,7 +2538,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2609000000857666015", PayloadGenerator.SwissQrCode.Iban.IbanType.Iban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.QRR, "990005000000000320071012303", ReferenceTextType.QrReference);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR, "990005000000000320071012303", PayloadGenerator.SwissQrCode.Reference.ReferenceTextType.QrReference);
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.", "Some bill information here...");
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var amount = 1234567891.25m;
@@ -2590,7 +2557,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2430043000000789012", PayloadGenerator.SwissQrCode.Iban.IbanType.QrIban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.NON);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.NON);
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.", "Some bill information here...");
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var amount = 100.25m;
@@ -2609,7 +2576,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2430043000000789012", PayloadGenerator.SwissQrCode.Iban.IbanType.QrIban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.QRR);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR);
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.", "Some bill information here...");
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var amount = 100.25m;
@@ -2629,7 +2596,7 @@ namespace QRCoderTests
         {
             var contactGeneral = PayloadGenerator.SwissQrCode.Contact.WithStructuredAddress("John Doe", "3003", "Bern", "CH", "Parlamentsgebäude", "1");
             var iban = new PayloadGenerator.SwissQrCode.Iban("CH2430043000000789012", PayloadGenerator.SwissQrCode.Iban.IbanType.QrIban);
-            var reference = new PayloadGenerator.SwissQrCode.Reference(ReferenceType.QRR);
+            var reference = new PayloadGenerator.SwissQrCode.Reference(PayloadGenerator.SwissQrCode.Reference.ReferenceType.QRR);
             var additionalInformation = new PayloadGenerator.SwissQrCode.AdditionalInformation("This is my unstructured message.", "Some bill information here...");
             var currency = PayloadGenerator.SwissQrCode.Currency.CHF;
             var amount = 100.25m;

@@ -1,16 +1,7 @@
-﻿#if NETFRAMEWORK || NETSTANDARD2_0 || NET5_0 || NET6_0_WINDOWS
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using static QRCoder.Base64QRCode;
-using static QRCoder.QRCodeGenerator;
+﻿using SkiaSharp;
 
-namespace QRCoder
+namespace Steeltype.QRCoderLite
 {
-#if NET6_0_WINDOWS
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
     public class Base64QRCode : AbstractQRCode, IDisposable
     {
         private QRCode qr;
@@ -32,84 +23,51 @@ namespace QRCoder
 
         public string GetGraphic(int pixelsPerModule)
         {
-            return this.GetGraphic(pixelsPerModule, Color.Black, Color.White, true);
+            return this.GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, true);
         }
 
 
-        public string GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, bool drawQuietZones = true, ImageType imgType = ImageType.Png)
+        public string GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
         {
-            return this.GetGraphic(pixelsPerModule, ColorTranslator.FromHtml(darkColorHtmlHex), ColorTranslator.FromHtml(lightColorHtmlHex), drawQuietZones, imgType);
+            return this.GetGraphic(pixelsPerModule, SKColor.Parse(darkColorHtmlHex), SKColor.Parse(lightColorHtmlHex), drawQuietZones, imgType);
         }
 
-        public string GetGraphic(int pixelsPerModule, Color darkColor, Color lightColor, bool drawQuietZones = true, ImageType imgType = ImageType.Png)
+        public string GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
         {
             var base64 = string.Empty;
-            using (Bitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, drawQuietZones))
-            {
-                base64 = BitmapToBase64(bmp, imgType);
-            }
+            using SKBitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, drawQuietZones);
+            base64 = BitmapToBase64(bmp, imgType);
             return base64;
         }
 
-        public string GetGraphic(int pixelsPerModule, Color darkColor, Color lightColor, Bitmap icon, int iconSizePercent = 15, int iconBorderWidth = 6, bool drawQuietZones = true, ImageType imgType = ImageType.Png)
+        public string GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKBitmap icon, int iconSizePercent = 15, int iconBorderWidth = 6, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
         {
             var base64 = string.Empty;
-            using (Bitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, icon, iconSizePercent, iconBorderWidth, drawQuietZones))
-            {
-                base64 = BitmapToBase64(bmp, imgType);
-            }
+            using SKBitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, icon, iconSizePercent, iconBorderWidth, drawQuietZones);
+            base64 = BitmapToBase64(bmp, imgType);
             return base64;
         }
 
-
-        private string BitmapToBase64(Bitmap bmp, ImageType imgType)
+        private string BitmapToBase64(SKBitmap bmp, SKEncodedImageFormat imgFormat)
         {
-            var base64 = string.Empty;
-            ImageFormat iFormat;
-            switch (imgType) {
-                case ImageType.Png:
-                    iFormat = ImageFormat.Png;
-                    break;
-                case ImageType.Jpeg:
-                    iFormat = ImageFormat.Jpeg;
-                    break;
-                case ImageType.Gif:
-                    iFormat = ImageFormat.Gif;
-                    break;
-                default:
-                    iFormat = ImageFormat.Png;
-                    break;
-            }
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                bmp.Save(memoryStream, iFormat);
-                base64 = Convert.ToBase64String(memoryStream.ToArray(), Base64FormattingOptions.None);
-            }
-            return base64;
-        }
+            using var image = SKImage.FromBitmap(bmp);
+            using var data = image.Encode(imgFormat, 100);
+            using MemoryStream memoryStream = new MemoryStream();
+            // Write the image data to a memory stream
+            data.SaveTo(memoryStream);
 
-        public enum ImageType
-        {
-            Gif,
-            Jpeg,
-            Png
+            return Convert.ToBase64String(memoryStream.ToArray());
         }
-
     }
-
-#if NET6_0_WINDOWS
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
+    
     public static class Base64QRCodeHelper
     {
-        public static string GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1, bool drawQuietZones = true, ImageType imgType = ImageType.Png)
+        public static string GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
         {
-            using (var qrGenerator = new QRCodeGenerator())
-            using (var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion))
-            using (var qrCode = new Base64QRCode(qrCodeData))
-                return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex, drawQuietZones, imgType);
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
+            using var qrCode = new Base64QRCode(qrCodeData);
+            return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex, drawQuietZones, imgType);
         }
     }
 }
-
-#endif

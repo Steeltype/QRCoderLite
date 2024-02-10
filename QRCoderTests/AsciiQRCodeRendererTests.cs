@@ -1,10 +1,8 @@
-﻿using Xunit;
-using QRCoder;
-using Shouldly;
-using QRCoderTests.Helpers.XUnitExtenstions;
+﻿using Shouldly;
+using Steeltype.QRCoderLite.Tests.Helpers;
+using Xunit;
 
-
-namespace QRCoderTests
+namespace Steeltype.QRCoderLite.Tests
 {
 
     public class AsciiQRCodeRendererTests

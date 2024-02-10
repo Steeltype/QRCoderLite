@@ -1,9 +1,7 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
-using static QRCoder.QRCodeGenerator;
+﻿using System.IO.Compression;
+using static Steeltype.QRCoderLite.QRCodeGenerator;
 
-namespace QRCoder
+namespace Steeltype.QRCoderLite
 {
     public sealed class PngByteQRCode : AbstractQRCode, IDisposable
     {
@@ -22,14 +20,12 @@ namespace QRCoder
         /// </summary>
         public byte[] GetGraphic(int pixelsPerModule, bool drawQuietZones = true)
         {
-            using (var png = new PngBuilder())
-            {
-                var size = (this.QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
-                png.WriteHeader(size, size, 1, PngBuilder.ColorType.Greyscale);
-                png.WriteScanlines(this.DrawScanlines(pixelsPerModule, drawQuietZones));
-                png.WriteEnd();
-                return png.GetBytes();
-            }
+            using var png = new PngBuilder();
+            var size = (this.QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
+            png.WriteHeader(size, size, 1, PngBuilder.ColorType.Greyscale);
+            png.WriteScanlines(this.DrawScanlines(pixelsPerModule, drawQuietZones));
+            png.WriteEnd();
+            return png.GetBytes();
         }
 
         /// <summary>
@@ -37,15 +33,13 @@ namespace QRCoder
         /// </summary>
         public byte[] GetGraphic(int pixelsPerModule, byte[] darkColorRgba, byte[] lightColorRgba, bool drawQuietZones = true)
         {
-            using (var png = new PngBuilder())
-            {
-                var size = (this.QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
-                png.WriteHeader(size, size, 1, PngBuilder.ColorType.Indexed);
-                png.WritePalette(darkColorRgba, lightColorRgba);
-                png.WriteScanlines(this.DrawScanlines(pixelsPerModule, drawQuietZones));
-                png.WriteEnd();
-                return png.GetBytes();
-            }
+            using var png = new PngBuilder();
+            var size = (this.QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
+            png.WriteHeader(size, size, 1, PngBuilder.ColorType.Indexed);
+            png.WritePalette(darkColorRgba, lightColorRgba);
+            png.WriteScanlines(this.DrawScanlines(pixelsPerModule, drawQuietZones));
+            png.WriteEnd();
+            return png.GetBytes();
         }
 
         /// <summary>
@@ -223,29 +217,24 @@ namespace QRCoder
             /// </summary>
             public void WriteScanlines(byte[] scanlines)
             {
-                using (var idatStream = new MemoryStream())
-                {
-                    Deflate(idatStream, scanlines);
+                using var idatStream = new MemoryStream();
+                Deflate(idatStream, scanlines);
 
-                    this.WriteChunkStart(IDAT, (int)(idatStream.Length + 6));
+                this.WriteChunkStart(IDAT, (int)(idatStream.Length + 6));
 
-                    // Deflate header.
-                    this.stream.WriteByte(0x78); // 8 Deflate algorithm, 7 max window size
-                    this.stream.WriteByte(0x9C); // Check bits.
+                // Deflate header.
+                this.stream.WriteByte(0x78); // 8 Deflate algorithm, 7 max window size
+                this.stream.WriteByte(0x9C); // Check bits.
 
-                    // Compressed data.
-                    idatStream.Position = 0;
-#if NET35
-                    idatStream.WriteTo(this.stream);
-#else
-                    idatStream.CopyTo(this.stream);
-#endif
-                    // Deflate checksum.
-                    var adler = Adler32(scanlines, 0, scanlines.Length);
-                    this.WriteIntBigEndian(adler);
+                // Compressed data.
+                idatStream.Position = 0;
+                idatStream.CopyTo(this.stream);
 
-                    this.WriteChunkEnd();
-                }
+                // Deflate checksum.
+                var adler = Adler32(scanlines, 0, scanlines.Length);
+                this.WriteIntBigEndian(adler);
+
+                this.WriteChunkEnd();
             }
 
             /// <summary>
@@ -280,10 +269,8 @@ namespace QRCoder
 
             private static void Deflate(Stream output, byte[] bytes)
             {
-                using (var deflateStream = new DeflateStream(output, CompressionMode.Compress, leaveOpen: true))
-                {
-                    deflateStream.Write(bytes, 0, bytes.Length);
-                }
+                using var deflateStream = new DeflateStream(output, CompressionMode.Compress, leaveOpen: true);
+                deflateStream.Write(bytes, 0, bytes.Length);
             }
 
             // Reference implementation from RFC 1950. Not optimized.
@@ -322,20 +309,18 @@ namespace QRCoder
     {
         public static byte[] GetQRCode(string plainText, int pixelsPerModule, byte[] darkColorRgba, byte[] lightColorRgba, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, EciMode eciMode = EciMode.Default, int requestedVersion = -1, bool drawQuietZones = true)
         {
-            using (var qrGenerator = new QRCodeGenerator())
-            using (var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion))
-            using (var qrCode = new PngByteQRCode(qrCodeData))
-                return qrCode.GetGraphic(pixelsPerModule, darkColorRgba, lightColorRgba, drawQuietZones);
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
+            using var qrCode = new PngByteQRCode(qrCodeData);
+            return qrCode.GetGraphic(pixelsPerModule, darkColorRgba, lightColorRgba, drawQuietZones);
         }
     
-
-
         public static byte[] GetQRCode(string txt, QRCodeGenerator.ECCLevel eccLevel, int size, bool drawQuietZones = true)
         {
-            using (var qrGen = new QRCodeGenerator())
-            using (var qrCode = qrGen.CreateQrCode(txt, eccLevel))
-            using (var qrPng = new PngByteQRCode(qrCode))
-                return qrPng.GetGraphic(size, drawQuietZones);
+            using var qrGen = new QRCodeGenerator();
+            using var qrCode = qrGen.CreateQrCode(txt, eccLevel);
+            using var qrPng = new PngByteQRCode(qrCode);
+            return qrPng.GetGraphic(size, drawQuietZones);
         }
     }    
 }

@@ -1,20 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-#if !NET35 && !NET452
-using Xunit.Abstractions;
-#endif
+﻿using Xunit.Abstractions;
 using Xunit.Sdk;
 
-namespace QRCoderTests.Helpers.XUnitExtenstions
+namespace Steeltype.QRCoderLite.Tests.Helpers
 {
-#if NET35 || NET452
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class CategoryAttribute : Attribute
-    {
-        public CategoryAttribute(string category) { }
-    }
-#else
     public class CategoryDiscoverer : ITraitDiscoverer
     {
         public const string KEY = "Category";
@@ -33,5 +21,4 @@ namespace QRCoderTests.Helpers.XUnitExtenstions
     {
         public CategoryAttribute(string category) { }
     }
-#endif
 }

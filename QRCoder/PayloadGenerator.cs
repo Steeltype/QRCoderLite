@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
-#if NETSTANDARD1_3
-using System.Reflection;
-#endif
 
-namespace QRCoder
+namespace Steeltype.QRCoderLite
 {
     public static class PayloadGenerator
     {
@@ -30,7 +24,7 @@ namespace QRCoder
             /// </summary>
             /// <param name="ssid">SSID of the WiFi network</param>
             /// <param name="password">Password of the WiFi network</param>
-            /// <param name="authenticationMode">Authentification mode (WEP, WPA, WPA2)</param>
+            /// <param name="authenticationMode">Authentication mode (WEP, WPA, WPA2)</param>
             /// <param name="isHiddenSSID">Set flag, if the WiFi network hides its SSID</param>
             /// <param name="escapeHexStrings">Set flag, if ssid/password is delivered as HEX string. Note: May not be supported on iOS devices.</param>
             public WiFi(string ssid, string password, Authentication authenticationMode, bool isHiddenSSID = false,  bool escapeHexStrings = true)
@@ -2006,7 +2000,7 @@ namespace QRCoder
 
             private void ProcessCommonFields(StringBuilder sb)
             {
-                if (String40Methods.IsNullOrWhiteSpace(Secret))
+                if (String.IsNullOrWhiteSpace(Secret))
                 {
                     throw new Exception("Secret must be a filled out base32 encoded string");
                 }
@@ -2014,7 +2008,7 @@ namespace QRCoder
                 string escapedIssuer = null;
                 string label = null;
 
-                if (!String40Methods.IsNullOrWhiteSpace(Issuer))
+                if (!String.IsNullOrWhiteSpace(Issuer))
                 {
                     if (Issuer.Contains(":"))
                     {
@@ -2023,7 +2017,7 @@ namespace QRCoder
                     escapedIssuer = Uri.EscapeDataString(Issuer);
                 }
 
-                if (!String40Methods.IsNullOrWhiteSpace(Label) && Label.Contains(":"))
+                if (!String.IsNullOrWhiteSpace(Label) && Label.Contains(":"))
                 {
                     throw new Exception("Label must not have a ':'");
                 }
@@ -2561,16 +2555,6 @@ namespace QRCoder
             /// <returns>A List of strings</returns>
             private List<string> GetOptionalFieldsAsList()
             {
-#if NETSTANDARD1_3
-                return oFields.GetType().GetRuntimeProperties()
-                        .Where(field => field.GetValue(oFields) != null)
-                        .Select(field => {
-                            var objValue = field.GetValue(oFields, null);
-                            var value = field.PropertyType.Equals(typeof(DateTime?)) ? ((DateTime)objValue).ToString("dd.MM.yyyy") : objValue.ToString();
-                            return $"{field.Name}={value}";
-                        })
-                        .ToList();
-#else
                 return oFields.GetType().GetProperties()
                         .Where(field => field.GetValue(oFields, null) != null)
                         .Select(field => {
@@ -2579,7 +2563,6 @@ namespace QRCoder
                             return $"{field.Name}={value}";                            
                          })
                         .ToList();
-#endif
             }
 
 
@@ -2589,16 +2572,6 @@ namespace QRCoder
             /// <returns>A List of strings</returns>
             private List<string> GetMandatoryFieldsAsList()
             {
-#if NETSTANDARD1_3
-                return mFields.GetType().GetRuntimeFields()
-                        .Where(field => field.GetValue(mFields) != null)
-                        .Select(field => {
-                            var objValue = field.GetValue(mFields);
-                            var value = field.FieldType.Equals(typeof(DateTime?)) ? ((DateTime)objValue).ToString("dd.MM.yyyy") : objValue.ToString();
-                            return $"{field.Name}={value}";
-                        })
-                        .ToList();
-#else
                 return mFields.GetType().GetFields()
                         .Where(field => field.GetValue(mFields) != null)
                         .Select(field => {
@@ -2607,7 +2580,6 @@ namespace QRCoder
                             return $"{field.Name}={value}";                            
                          })
                         .ToList();
-#endif
             }
 
             /// <summary>

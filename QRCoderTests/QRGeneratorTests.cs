@@ -1,14 +1,11 @@
-﻿using QRCoder;
-using QRCoderTests.Helpers.XUnitExtenstions;
-using Shouldly;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Reflection;
-using Xunit;
-using System.Linq;
-using System.Collections;
 using System.Text;
+using Shouldly;
+using Steeltype.QRCoderLite.Tests.Helpers;
+using Xunit;
 
-namespace QRCoderTests
+namespace Steeltype.QRCoderLite.Tests
 {
 
     public class QRGeneratorTests

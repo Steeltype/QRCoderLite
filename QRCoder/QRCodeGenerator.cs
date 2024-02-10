@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Collections;
+using System.Text;
 
-namespace QRCoder
+namespace Steeltype.QRCoderLite
 {
     public class QRCodeGenerator : IDisposable
     {
@@ -138,7 +135,8 @@ namespace QRCoder
                 if (minVersion > version)
                 {
                     var maxSizeByte = capacityTable[version - 1].Details.First(x => x.ErrorCorrectionLevel == eccLevel).CapacityDict[encoding];
-                    throw new QRCoder.Exceptions.DataTooLongException(eccLevel.ToString(), encoding.ToString(), version, maxSizeByte);
+
+                    throw new ArgumentOutOfRangeException($"The chosen version ({version}) is too small to hold the data. The minimum version required is {minVersion} for the given data length. The maximum data length for version {version} is {maxSizeByte} bytes.");
                 }                    
             }
 
@@ -885,7 +883,8 @@ namespace QRCoder
                 x => x.Details.Any(
                     y => (y.ErrorCorrectionLevel == eccLevel))
                 ).Max(x => x.Details.Single(y => y.ErrorCorrectionLevel == eccLevel).CapacityDict[encMode]);
-            throw new QRCoder.Exceptions.DataTooLongException(eccLevel.ToString(), encMode.ToString(), maxSizeByte);
+
+            throw new ArgumentOutOfRangeException("The given data is too large to fit in a QR code with the given error correction level. The maximum size for this combination is " + maxSizeByte + " bytes.");
         }
 
         private static EncodingMode GetEncodingFromPlaintext(string plainText, bool forceUtf8)
@@ -1104,11 +1103,7 @@ namespace QRCoder
             Encoding utf8 = Encoding.UTF8;
             byte[] utfBytes = utf8.GetBytes(value);
             byte[] isoBytes = Encoding.Convert(utf8, iso, utfBytes);
-#if NETFRAMEWORK || NETSTANDARD2_0 || NET5_0
-            return iso.GetString(isoBytes);
-#else
             return iso.GetString(isoBytes, 0, isoBytes.Length);
-#endif
         }
 
         private static string PlainTextToBinaryByte(string plainText, EciMode eciMode, bool utf8BOM, bool forceUtf8)

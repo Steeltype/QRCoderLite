@@ -1,19 +1,12 @@
-﻿#if NETFRAMEWORK || NETSTANDARD2_0 || NET5_0 || NET6_0_WINDOWS
-using System;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
+﻿using System.Drawing.Imaging;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using static QRCoder.QRCodeGenerator;
+using System.Text;
+using SkiaSharp;
+using static Steeltype.QRCoderLite.QRCodeGenerator;
 
 /* This renderer is inspired by RemusVasii: https://github.com/codebude/QRCoder/issues/223 */
-namespace QRCoder
+namespace Steeltype.QRCoderLite
 {
-
-#if NET6_0_WINDOWS
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
     // ReSharper disable once InconsistentNaming
     public class PdfByteQRCode : AbstractQRCode, IDisposable
     {
@@ -72,23 +65,26 @@ namespace QRCoder
                 pngArray = qrCode.GetGraphic(pixelsPerModule, HexColorToByteArray(darkColorHtmlHex), HexColorToByteArray(lightColorHtmlHex));
             }            
 
-            //Create image and transofrm to JPG
-            using (var msPng = new MemoryStream())
+            // Convert PNG byte array to SKBitmap
+            SKBitmap bitmap;
+            using (var msPng = new MemoryStream(pngArray))
             {
-                msPng.Write(pngArray, 0, pngArray.Length);
-                var img = System.Drawing.Image.FromStream(msPng);
-                using (var msJpeg = new MemoryStream())
-                {
-                    // Create JPEG with specified quality
-                    var jpgImageCodecInfo = ImageCodecInfo.GetImageEncoders().First(x => x.MimeType == "image/jpeg");
-                    var jpgEncoderParameters = new EncoderParameters(1) { 
-                        Param = new EncoderParameter[]{ new EncoderParameter(Encoder.Quality, jpgQuality) }
-                    };
-                    img.Save(msJpeg, jpgImageCodecInfo, jpgEncoderParameters);
-                    jpgArray = msJpeg.ToArray();
-                }
+                bitmap = SKBitmap.Decode(msPng);
             }
-            
+
+            // Ensure the bitmap was successfully loaded
+            if (bitmap == null) throw new InvalidOperationException("Failed to load the PNG image.");
+
+            //Create image and transform to JPG
+            using (var image = SKImage.FromBitmap(bitmap))
+            {
+                // Encode the SKImage to JPEG format with the specified quality
+                using var data = image.Encode(SKEncodedImageFormat.Jpeg, (int)jpgQuality);
+                using var msJpeg = new MemoryStream();
+                data.SaveTo(msJpeg);
+                jpgArray = msJpeg.ToArray();
+            }
+
             //Create PDF document
             using (var stream = new MemoryStream())
             {
@@ -212,32 +208,26 @@ namespace QRCoder
             }
         }
     }
-
-#if NET6_0_WINDOWS
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
+    
     public static class PdfByteQRCodeHelper
     {
         public static byte[] GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex,
             string lightColorHtmlHex, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false,
             EciMode eciMode = EciMode.Default, int requestedVersion = -1)
         {
-            using (var qrGenerator = new QRCodeGenerator())
-            using (
-                var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode,
-                    requestedVersion))
-            using (var qrCode = new PdfByteQRCode(qrCodeData))
-                return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex);
+            using var qrGenerator = new QRCodeGenerator();
+            using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode,
+                requestedVersion);
+            using var qrCode = new PdfByteQRCode(qrCodeData);
+            return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex);
         }
 
         public static byte[] GetQRCode(string txt, ECCLevel eccLevel, int size)
         {
-            using (var qrGen = new QRCodeGenerator())
-            using (var qrCode = qrGen.CreateQrCode(txt, eccLevel))
-            using (var qrBmp = new PdfByteQRCode(qrCode))
-                return qrBmp.GetGraphic(size);
-
+            using var qrGen = new QRCodeGenerator();
+            using var qrCode = qrGen.CreateQrCode(txt, eccLevel);
+            using var qrBmp = new PdfByteQRCode(qrCode);
+            return qrBmp.GetGraphic(size);
         }
     }
 }
-#endif
