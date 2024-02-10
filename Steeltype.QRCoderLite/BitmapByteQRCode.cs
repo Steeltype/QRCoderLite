@@ -4,11 +4,6 @@ namespace Steeltype.QRCoderLite
 {
     public class BitmapByteQRCode : AbstractQRCode, IDisposable
     {
-        /// <summary>
-        /// Constructor without params to be used in COM Objects connections
-        /// </summary>
-        public BitmapByteQRCode() { }
-
         public BitmapByteQRCode(QRCodeData data) : base(data) { }
 
         public byte[] GetGraphic(int pixelsPerModule)
@@ -18,50 +13,79 @@ namespace Steeltype.QRCoderLite
 
         public byte[] GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex)
         {
-            return GetGraphic(pixelsPerModule, HexColorToByteArray(darkColorHtmlHex), HexColorToByteArray(lightColorHtmlHex));
+            return GetGraphic(pixelsPerModule, Utilities.HexColorToByteArray(darkColorHtmlHex), Utilities.HexColorToByteArray(lightColorHtmlHex));
+        }
+
+        private readonly byte[] BITMAP_HEADER_START = new byte[]
+        {
+            // BMP Signature
+            0x42, // 'B'
+            0x4D, // 'M'
+            // File size (set to 0 here, indicating it will be filled in later)
+            0x4C, 0x00, 0x00, 0x00, 
+            // Reserved fields (unused and set to zero)
+            0x00, 0x00, 
+            0x00, 0x00, 
+            // Offset where the pixel array (bitmap data) can be found
+            0x1E, 0x00, 0x00, 0x00,
+            // Header size (12 bytes for BITMAPCOREHEADER)
+            0x0C, 0x00, 0x00, 0x00,
+            // Following would continue with width, height, planes, bitCount, etc., based on specific BMP format
+        };
+
+        private readonly byte[] BITMAP_HEADER_END = new byte[]
+        {
+            0x01, 0x00, // Planes (1)
+            0x18, 0x00 // Bits per pixel (24)
+        };
+
+        // Create a bitmap file header for the given width and height.
+        private List<byte> CreateBitmapHeader(int width, int height)
+        {
+            var header = new List<byte>(BITMAP_HEADER_START);
+            header.AddRange(Utilities.IntTo4Byte(width));
+            header.AddRange(Utilities.IntTo4Byte(height));
+            header.AddRange(BITMAP_HEADER_END);
+            return header;
         }
 
         public byte[] GetGraphic(int pixelsPerModule, byte[] darkColorRgb, byte[] lightColorRgb)
         {
-            var sideLength = this.QrCodeData.ModuleMatrix.Count * pixelsPerModule;
+            var sideLength = QrCodeData.ModuleMatrix.Count * pixelsPerModule;
 
             var moduleDark = darkColorRgb.Reverse();
             var moduleLight = lightColorRgb.Reverse();
 
-            List<byte> bmp = new List<byte>();
-
-            //header
-            bmp.AddRange(new byte[] { 0x42, 0x4D, 0x4C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1A, 0x00, 0x00, 0x00, 0x0C, 0x00, 0x00, 0x00 });
-
-            //width
-            bmp.AddRange(IntTo4Byte(sideLength));
-            //height
-            bmp.AddRange(IntTo4Byte(sideLength));
-
-            //header end
-            bmp.AddRange(new byte[] { 0x01, 0x00, 0x18, 0x00 });
+            var bmp = CreateBitmapHeader(sideLength, sideLength);
 
             //draw qr code
-            for (var x = sideLength - 1; x >= 0; x = x - pixelsPerModule)
+            var modulesCount = QrCodeData.ModuleMatrix.Count; // Total number of modules per side in the QR code.
+
+            // Iterate over each module in the QR code.
+            for (var moduleX = modulesCount - 1; moduleX >= 0; moduleX--)
             {
-                for (int pm = 0; pm < pixelsPerModule; pm++)
+                for (var moduleY = 0; moduleY < modulesCount; moduleY++)
                 {
-                    for (var y = 0; y < sideLength; y = y + pixelsPerModule)
+                    // Determine if the current module is dark or light.
+                    var isModuleDark = QrCodeData.ModuleMatrix[moduleX][moduleY];
+
+                    // For each pixel within a module (both X and Y directions).
+                    for (var pixelX = 0; pixelX < pixelsPerModule; pixelX++)
                     {
-                        var module =
-                            this.QrCodeData.ModuleMatrix[(x + pixelsPerModule) / pixelsPerModule - 1][(y + pixelsPerModule) / pixelsPerModule - 1];
-                        for (int i = 0; i < pixelsPerModule; i++)
+                        for (var pixelY = 0; pixelY < pixelsPerModule; pixelY++)
                         {
-                            bmp.AddRange(module ? moduleDark : moduleLight);
+                            // Add the appropriate color bytes for this pixel.
+                            bmp.AddRange(isModuleDark ? moduleDark : moduleLight);
                         }
                     }
-                    if (sideLength % 4 != 0)
-                    {
-                        for (int i = 0; i < sideLength % 4; i++)
-                        {
-                            bmp.Add(0x00);
-                        }
-                    }
+                }
+
+                // Handle padding for QR codes where the side length isn't evenly divisible by 4.
+                if (sideLength % 4 == 0) continue;
+
+                for (var i = 0; i < sideLength % 4; i++)
+                {
+                    bmp.Add(0x00); // Pad with zeros to align to a 4-byte boundary.
                 }
             }
 
@@ -69,27 +93,6 @@ namespace Steeltype.QRCoderLite
             bmp.AddRange(new byte[] { 0x00, 0x00 });
 
             return bmp.ToArray();
-        }
-
-        private byte[] HexColorToByteArray(string colorString)
-        {
-            if (colorString.StartsWith("#"))
-                colorString = colorString.Substring(1);
-            byte[] byteColor = new byte[colorString.Length / 2];
-            for (int i = 0; i < byteColor.Length; i++)
-                byteColor[i] = byte.Parse(colorString.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-            return byteColor;
-        }
-
-        private byte[] IntTo4Byte(int inp)
-        {
-            byte[] bytes = new byte[2];
-            unchecked
-            {
-                bytes[1] = (byte)(inp >> 8);
-                bytes[0] = (byte)(inp);
-            }
-            return bytes;
         }
     }
 
@@ -106,7 +109,7 @@ namespace Steeltype.QRCoderLite
             return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex);
         }
 
-        public static byte[] GetQRCode(string txt, QRCodeGenerator.ECCLevel eccLevel, int size)
+        public static byte[] GetQRCode(string txt, ECCLevel eccLevel, int size)
         {
             using var qrGen = new QRCodeGenerator();
             using var qrCode = qrGen.CreateQrCode(txt, eccLevel);

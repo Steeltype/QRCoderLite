@@ -83,7 +83,7 @@ namespace Steeltype.QRCoderLite.Tests
 
             var exception = Record.Exception(() => aCode.GetGraphic(10, SKColors.Black, SKColors.White, SKColors.Transparent, pixelSizeFactor: 2));
             Assert.NotNull(exception);
-            Assert.IsType<System.Exception>(exception);
+            Assert.IsType<Exception>(exception);
             exception.Message.ShouldBe("The parameter pixelSize must be between 0 and 1. (0-100%)");
         }
 

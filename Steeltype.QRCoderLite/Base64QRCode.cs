@@ -4,7 +4,7 @@ namespace Steeltype.QRCoderLite
 {
     public class Base64QRCode : AbstractQRCode, IDisposable
     {
-        private QRCode qr;
+        private readonly QRCode qr;
 
         /// <summary>
         /// Constructor without params to be used in COM Objects connections
@@ -21,41 +21,38 @@ namespace Steeltype.QRCoderLite
 
         public override void SetQRCodeData(QRCodeData data)
         {
-            this.qr.SetQRCodeData(data);
+            qr.SetQRCodeData(data);
         }
 
         public string GetGraphic(int pixelsPerModule)
         {
-            return this.GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, true);
+            return GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, true);
         }
 
 
         public string GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
         {
-            return this.GetGraphic(pixelsPerModule, SKColor.Parse(darkColorHtmlHex), SKColor.Parse(lightColorHtmlHex), drawQuietZones, imgType);
+            return GetGraphic(pixelsPerModule, SKColor.Parse(darkColorHtmlHex), SKColor.Parse(lightColorHtmlHex), drawQuietZones, imgType);
         }
 
         public string GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
         {
-            var base64 = string.Empty;
             using SKBitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, drawQuietZones);
-            base64 = BitmapToBase64(bmp, imgType);
-            return base64;
+            return BitmapToBase64(bmp, imgType);
         }
 
         public string GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKBitmap icon, int iconSizePercent = 15, int iconBorderWidth = 6, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
         {
-            var base64 = string.Empty;
             using SKBitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, icon, iconSizePercent, iconBorderWidth, drawQuietZones);
-            base64 = BitmapToBase64(bmp, imgType);
-            return base64;
+            return BitmapToBase64(bmp, imgType);
         }
 
         private string BitmapToBase64(SKBitmap bmp, SKEncodedImageFormat imgFormat)
         {
             using var image = SKImage.FromBitmap(bmp);
             using var data = image.Encode(imgFormat, 100);
-            using MemoryStream memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
+
             // Write the image data to a memory stream
             data.SaveTo(memoryStream);
 

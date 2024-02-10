@@ -1251,7 +1251,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1271,7 +1271,7 @@ namespace Steeltype.QRCoderLite.Tests
             var postingKey = 69;
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1291,7 +1291,7 @@ namespace Steeltype.QRCoderLite.Tests
             var postingKey = 69;
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebit, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singledirectdebit, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, DateTime.Now);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1315,7 +1315,7 @@ namespace Steeltype.QRCoderLite.Tests
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1332,7 +1332,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
 
             generator
                 .ToString()
@@ -1352,7 +1352,7 @@ namespace Steeltype.QRCoderLite.Tests
             var amount = 10.00m;
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban, bic, amount, "", 0, null, null, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban, bic, amount, "", 0, null, null, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
 
             generator
                 .ToString()
@@ -1374,7 +1374,7 @@ namespace Steeltype.QRCoderLite.Tests
             var amount = 10.00m;
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
 
             generator
                 .ToString()
@@ -1398,7 +1398,7 @@ namespace Steeltype.QRCoderLite.Tests
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now);
 
             generator
                 .ToString()
@@ -1414,7 +1414,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bnc = "100205000";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact, name, account: account, bnc: bnc);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Contact, name, account: account, bnc: bnc);
 
             generator
                 .ToString()
@@ -1430,7 +1430,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bnc = "100205000";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact, name, account, bnc, "", "", "New business contact.");
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Contact, name, account, bnc, "", "", "New business contact.");
 
             generator
                 .ToString()
@@ -1447,7 +1447,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bnc = "100205000";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact_v2, name, account: account, bnc: bnc);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.ContactV2, name, account: account, bnc: bnc);
 
             generator
                 .ToString()
@@ -1463,7 +1463,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bic = "BFSWDE33BER";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact_v2, name, iban: iban, bic: bic);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.ContactV2, name, iban: iban, bic: bic);
 
             generator
                 .ToString()
@@ -1480,7 +1480,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bic = "BFSWDE33BER";
             var name = "Wikimedia Fördergesellschaft";
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.contact_v2, name, "", "", iban, bic, "A new v2 contact.");
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.ContactV2, name, "", "", iban, bic, "A new v2 contact.");
 
             generator
                 .ToString()
@@ -1498,7 +1498,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1515,7 +1515,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1532,7 +1532,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
 
             generator
                 .ToString()
@@ -1549,7 +1549,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount);
 
             generator
                 .ToString()
@@ -1566,7 +1566,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10;
 #pragma warning disable CS0612
-            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount);
+            var generator = new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account: account, bnc: bnc, amount: amount);
 #pragma warning restore CS0612
             generator
                 .ToString()
@@ -1582,7 +1582,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bnc = "10020 5000";
             var name = "Wikimedia Fördergesellschaft";
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account, bnc, "", "", "New business contact."));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account, bnc, "", "", "New business contact."));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1598,7 +1598,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bic = "BFSWDE33BER";
             var name = "Wikimedia Fördergesellschaft";
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban: iban, bic: bic));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Periodicsinglepaymentsepa, name, iban: iban, bic: bic));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1615,7 +1615,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, account: account, bnc: bnc, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, account: account, bnc: bnc, amount: amount));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1638,7 +1638,7 @@ namespace Steeltype.QRCoderLite.Tests
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Periodicsinglepayment, name, account, bnc, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, reason, postingKey, currency, DateTime.Now));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1655,7 +1655,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, iban: iban, bic: bic, amount: amount));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1679,7 +1679,7 @@ namespace Steeltype.QRCoderLite.Tests
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1697,7 +1697,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft has really really really long name, over 71 chars";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1716,7 +1716,7 @@ namespace Steeltype.QRCoderLite.Tests
             var reason = "A long long long reason text which may resolve in an exception";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount, reason: reason));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount, reason: reason));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1734,7 +1734,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account: account, bnc: bnc, amount: amount));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1751,7 +1751,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account: account, bnc: bnc, amount: amount));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1769,7 +1769,7 @@ namespace Steeltype.QRCoderLite.Tests
             var postingKey = 101;
             var amount = 10.00m;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account: account, bnc: bnc, amount: amount, postingKey: postingKey));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account: account, bnc: bnc, amount: amount, postingKey: postingKey));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1786,7 +1786,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1804,7 +1804,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.00m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1827,7 +1827,7 @@ namespace Steeltype.QRCoderLite.Tests
             var amount = 10.00m;
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1850,7 +1850,7 @@ namespace Steeltype.QRCoderLite.Tests
             var amount = 10.00m;
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1872,7 +1872,7 @@ namespace Steeltype.QRCoderLite.Tests
             var amount = 10.00m;
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singledirectdebitsepa, name, iban, bic, amount, "", 0, null, null, creditorId, mandateId, new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1888,7 +1888,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 10.001m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1906,7 +1906,7 @@ namespace Steeltype.QRCoderLite.Tests
             var name = "Wikimedia Fördergesellschaft";
             var amount = 1000000000m;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepaymentsepa, name, iban: iban, bic: bic, amount: amount));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1928,7 +1928,7 @@ namespace Steeltype.QRCoderLite.Tests
             var executionDate = new DateTime(2017, 1, 1);
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 #pragma warning disable CS0612
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, executionDate));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Singlepayment, name, account, bnc, amount, "", 0, null, null, reason, postingKey, currency, executionDate));
 #pragma warning restore CS0612
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1952,7 +1952,7 @@ namespace Steeltype.QRCoderLite.Tests
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -1976,7 +1976,7 @@ namespace Steeltype.QRCoderLite.Tests
             var periodicLastExecutionDate = DateTime.Now.AddMonths(3);
             PayloadGenerator.BezahlCode.Currency currency = PayloadGenerator.BezahlCode.Currency.USD;
 
-            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
+            var exception = Record.Exception(() => new PayloadGenerator.BezahlCode(PayloadGenerator.BezahlCode.AuthorityType.Periodicsinglepaymentsepa, name, iban, bic, amount, periodicTimeunit, periodicTimeunitRotation, periodicFirstExecutionDate, periodicLastExecutionDate, "", "", new DateTime(2017, 03, 01), reason, sepaReference, currency, DateTime.Now));
 
             Assert.NotNull(exception);
             Assert.IsType<PayloadGenerator.BezahlCode.BezahlCodeException>(exception);
@@ -3085,7 +3085,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bankName = "ОАО \"БАНК\"";
             var name = "ООО «Три кита»";
             var correspAcc = "30101810965770000413";
-            var generator = new PayloadGenerator.RussiaPaymentOrder(name, account, bankName, bic, correspAcc, null, PayloadGenerator.RussiaPaymentOrder.CharacterSets.windows_1251);
+            var generator = new PayloadGenerator.RussiaPaymentOrder(name, account, bankName, bic, correspAcc, null, PayloadGenerator.RussiaPaymentOrder.CharacterSets.Windows1251);
 
             byte[] targetBytes = new byte[] { 83, 84, 48, 48, 48, 49, 49, 124, 78, 97, 109, 101, 61, 206, 206, 206, 32, 171, 210, 240, 232, 32, 234, 232, 242, 224, 187, 124, 80, 101, 114, 115, 111, 110, 97, 108, 65, 99, 99, 61, 52, 48, 55, 48, 50, 56, 49, 48, 49, 51, 56, 50, 53, 48, 49, 50, 51, 48, 49, 55, 124, 66, 97, 110, 107, 78, 97, 109, 101, 61, 206, 192, 206, 32, 34, 193, 192, 205, 202, 34, 124, 66, 73, 67, 61, 48, 52, 52, 53, 50, 53, 50, 50, 53, 124, 67, 111, 114, 114, 101, 115, 112, 65, 99, 99, 61, 51, 48, 49, 48, 49, 56, 49, 48, 57, 54, 53, 55, 55, 48, 48, 48, 48, 52, 49, 51, 124 };
             var payloadBytes = generator.ToBytes();
@@ -3108,7 +3108,7 @@ namespace Steeltype.QRCoderLite.Tests
             var bankName = "ОАО \"БАНК\"";
             var name = "ООО «Три кита»";
             var correspAcc = "30101810965770000413";
-            var generator = new PayloadGenerator.RussiaPaymentOrder(name, account, bankName, bic, correspAcc, null, PayloadGenerator.RussiaPaymentOrder.CharacterSets.koi8_r);
+            var generator = new PayloadGenerator.RussiaPaymentOrder(name, account, bankName, bic, correspAcc, null, PayloadGenerator.RussiaPaymentOrder.CharacterSets.Koi8R);
 
             byte[] targetBytes = new byte[] { 83, 84, 48, 48, 48, 49, 51, 124, 78, 97, 109, 101, 61, 239, 239, 239, 32, 60, 244, 210, 201, 32, 203, 201, 212, 193, 62, 124, 80, 101, 114, 115, 111, 110, 97, 108, 65, 99, 99, 61, 52, 48, 55, 48, 50, 56, 49, 48, 49, 51, 56, 50, 53, 48, 49, 50, 51, 48, 49, 55, 124, 66, 97, 110, 107, 78, 97, 109, 101, 61, 239, 225, 239, 32, 34, 226, 225, 238, 235, 34, 124, 66, 73, 67, 61, 48, 52, 52, 53, 50, 53, 50, 50, 53, 124, 67, 111, 114, 114, 101, 115, 112, 65, 99, 99, 61, 51, 48, 49, 48, 49, 56, 49, 48, 57, 54, 53, 55, 55, 48, 48, 48, 48, 52, 49, 51, 124 };
             var payloadBytes = generator.ToBytes();

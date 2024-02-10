@@ -24,7 +24,7 @@ namespace Steeltype.QRCoderLite
         /// <returns>QRCode graphic as bitmap</returns>
         public SKBitmap GetGraphic(int pixelsPerModule)
         {
-            return this.GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, SKColors.Transparent);
+            return GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, SKColors.Transparent);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Steeltype.QRCoderLite
         /// <returns>QRCode graphic as bitmap</returns>
         public SKBitmap GetGraphic(SKBitmap backgroundImage = null)
         {
-            return this.GetGraphic(10, SKColors.Black, SKColors.White, SKColors.Transparent, backgroundImage: backgroundImage);
+            return GetGraphic(10, SKColors.Black, SKColors.White, SKColors.Transparent, backgroundImage: backgroundImage);
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Steeltype.QRCoderLite
         {
             if (pixelSizeFactor > 1)
                 throw new Exception("The parameter pixelSize must be between 0 and 1. (0-100%)");
-            int pixelSize = (int)Math.Min(pixelsPerModule, Math.Floor(pixelsPerModule * pixelSizeFactor));
+            var pixelSize = (int)Math.Min(pixelsPerModule, Math.Floor(pixelsPerModule * pixelSizeFactor));
 
             var numModules = QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8);
             var offset = (drawQuietZones ? 0 : 4);
@@ -70,11 +70,11 @@ namespace Steeltype.QRCoderLite
             // Render background if set
             if (backgroundImage != null)
             {
-                SKRect backgroundDestRect = backgroundImageStyle == BackgroundImageStyle.Fill
+                var backgroundDestRect = backgroundImageStyle == BackgroundImageStyle.Fill
                     ? new SKRect(0, 0, size, size)
                     : new SKRect(offset * pixelsPerModule, offset * pixelsPerModule, size - offset * pixelsPerModule, size - offset * pixelsPerModule);
 
-                SKBitmap resizedBackgroundImage = Resize(backgroundImage, size);
+                var resizedBackgroundImage = Resize(backgroundImage, size);
                 canvas.DrawBitmap(resizedBackgroundImage, backgroundDestRect);
             }
 
@@ -87,7 +87,7 @@ namespace Steeltype.QRCoderLite
                 for (var y = 0; y < numModules; y++)
                 {
                     var rectangle = new SKRect(x * pixelsPerModule, y * pixelsPerModule, (x + 1) * pixelsPerModule, (y + 1) * pixelsPerModule);
-                    var pixelIsDark = this.QrCodeData.ModuleMatrix[offset + y][offset + x];
+                    var pixelIsDark = QrCodeData.ModuleMatrix[offset + y][offset + x];
                     var pixelImage = pixelIsDark ? darkModulePixel : lightModulePixel;
 
                     if (!IsPartOfFinderPattern(x, y, numModules, offset))
@@ -108,9 +108,9 @@ namespace Steeltype.QRCoderLite
                 var finderPatternSize = 7 * pixelsPerModule;
                 var finderPatternDestRects = new SKRect[]
                 {
-                    new SKRect(0, 0, finderPatternSize, finderPatternSize),
-                    new SKRect(size - finderPatternSize, 0, finderPatternSize, finderPatternSize),
-                    new SKRect(0, size - finderPatternSize, finderPatternSize, finderPatternSize)
+                    new(0, 0, finderPatternSize, finderPatternSize),
+                    new(size - finderPatternSize, 0, finderPatternSize, finderPatternSize),
+                    new(0, size - finderPatternSize, finderPatternSize, finderPatternSize)
                 };
                 foreach (var rect in finderPatternDestRects)
                 {
@@ -126,7 +126,7 @@ namespace Steeltype.QRCoderLite
         /// </summary>
         /// <param name="pixelsPerModule">Pixels used per module rendered</param>
         /// <param name="pixelSize">Size of the dots</param>
-        /// <param name="brush">Color of the pixels</param>
+        /// <param name="color">Color of the pixels</param>
         /// <returns></returns>
         private SKBitmap MakeDotPixel(int pixelsPerModule, int pixelSize, SKColor color)
         {
@@ -173,7 +173,7 @@ namespace Steeltype.QRCoderLite
         /// <param name="y">Y position</param>
         /// <param name="numModules">Total number of modules per row</param>
         /// <returns>true, if position is part of quiet zone</returns>
-        private bool IsPartOfQuietZone(int x, int y, int numModules)
+        private static bool IsPartOfQuietZone(int x, int y, int numModules)
         {
             return
                 x < 4 || //left 
@@ -191,7 +191,7 @@ namespace Steeltype.QRCoderLite
         /// <param name="numModules">Total number of modules per row</param>
         /// <param name="offset">Offset in modules (usually depending on drawQuietZones parameter)</param>
         /// <returns>true, if position is part of any finder pattern</returns>
-        private bool IsPartOfFinderPattern(int x, int y, int numModules, int offset)
+        private static bool IsPartOfFinderPattern(int x, int y, int numModules, int offset)
         {
             var cornerSize = 11 - offset;
             var outerLimitLow = (numModules - cornerSize - 1);
@@ -209,11 +209,11 @@ namespace Steeltype.QRCoderLite
         /// <param name="image"></param>
         /// <param name="newSize"></param>
         /// <returns>Resized image as bitmap</returns>
-        private SKBitmap Resize(SKBitmap image, int newSize)
+        private static SKBitmap Resize(SKBitmap image, int newSize)
         {
             if (image == null) return null;
 
-            float scale = Math.Min((float)newSize / image.Width, (float)newSize / image.Height);
+            var scale = Math.Min((float)newSize / image.Width, (float)newSize / image.Height);
             var scaledWidth = (int)(image.Width * scale);
             var scaledHeight = (int)(image.Height * scale);
             var offsetX = (newSize - scaledWidth) / 2;

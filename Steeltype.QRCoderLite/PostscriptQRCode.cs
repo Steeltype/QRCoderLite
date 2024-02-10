@@ -5,46 +5,42 @@ namespace Steeltype.QRCoderLite
 
     public class PostscriptQRCode : AbstractQRCode, IDisposable
     {
-        /// <summary>
-        /// Constructor without params to be used in COM Objects connections
-        /// </summary>
-        public PostscriptQRCode() { }
         public PostscriptQRCode(QRCodeData data) : base(data) { }
 
         public string GetGraphic(int pointsPerModule, bool epsFormat = false)
         {
-            var viewBox = new Size(pointsPerModule * this.QrCodeData.ModuleMatrix.Count, pointsPerModule * this.QrCodeData.ModuleMatrix.Count);
-            return this.GetGraphic(viewBox, Color.Black, Color.White, true, epsFormat);
+            var viewBox = new Size(pointsPerModule * QrCodeData.ModuleMatrix.Count, pointsPerModule * QrCodeData.ModuleMatrix.Count);
+            return GetGraphic(viewBox, Color.Black, Color.White, true, epsFormat);
         }
         public string GetGraphic(int pointsPerModule, Color darkColor, Color lightColor, bool drawQuietZones = true, bool epsFormat = false)
         {
-            var viewBox = new Size(pointsPerModule * this.QrCodeData.ModuleMatrix.Count, pointsPerModule * this.QrCodeData.ModuleMatrix.Count);
-            return this.GetGraphic(viewBox, darkColor, lightColor, drawQuietZones, epsFormat);
+            var viewBox = new Size(pointsPerModule * QrCodeData.ModuleMatrix.Count, pointsPerModule * QrCodeData.ModuleMatrix.Count);
+            return GetGraphic(viewBox, darkColor, lightColor, drawQuietZones, epsFormat);
         }
 
         public string GetGraphic(int pointsPerModule, string darkColorHex, string lightColorHex, bool drawQuietZones = true, bool epsFormat = false)
         {
-            var viewBox = new Size(pointsPerModule * this.QrCodeData.ModuleMatrix.Count, pointsPerModule * this.QrCodeData.ModuleMatrix.Count);
-            return this.GetGraphic(viewBox, darkColorHex, lightColorHex, drawQuietZones, epsFormat);
+            var viewBox = new Size(pointsPerModule * QrCodeData.ModuleMatrix.Count, pointsPerModule * QrCodeData.ModuleMatrix.Count);
+            return GetGraphic(viewBox, darkColorHex, lightColorHex, drawQuietZones, epsFormat);
         }
 
         public string GetGraphic(Size viewBox, bool drawQuietZones = true, bool epsFormat = false)
         {
-            return this.GetGraphic(viewBox, Color.Black, Color.White, drawQuietZones, epsFormat);
+            return GetGraphic(viewBox, Color.Black, Color.White, drawQuietZones, epsFormat);
         }
 
         public string GetGraphic(Size viewBox, string darkColorHex, string lightColorHex, bool drawQuietZones = true, bool epsFormat = false)
         {
-            return this.GetGraphic(viewBox, ColorTranslator.FromHtml(darkColorHex), ColorTranslator.FromHtml(lightColorHex), drawQuietZones, epsFormat);
+            return GetGraphic(viewBox, ColorTranslator.FromHtml(darkColorHex), ColorTranslator.FromHtml(lightColorHex), drawQuietZones, epsFormat);
         }
 
         public string GetGraphic(Size viewBox, Color darkColor, Color lightColor, bool drawQuietZones = true, bool epsFormat = false)
         {
             var offset = drawQuietZones ? 0 : 4;
-            var drawableModulesCount = this.QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : offset * 2);
+            var drawableModulesCount = QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : offset * 2);
             var pointsPerModule = (double)Math.Min(viewBox.Width, viewBox.Height) / (double)drawableModulesCount;
 
-            string psFile = string.Format(psHeader, new object[] {
+            var psFile = string.Format(psHeader, new object[] {
                 DateTime.Now.ToString("s"), CleanSvgVal(viewBox.Width), CleanSvgVal(pointsPerModule),
                 epsFormat ? "EPSF-3.0" : string.Empty
             });
@@ -54,13 +50,13 @@ namespace Steeltype.QRCoderLite
                 drawableModulesCount
             });
 
-            for (int xi = offset; xi < offset + drawableModulesCount; xi++)
+            for (var xi = offset; xi < offset + drawableModulesCount; xi++)
             {
                 if (xi > offset)
                     psFile += "nl\n";
-                for (int yi = offset; yi < offset + drawableModulesCount; yi++)
+                for (var yi = offset; yi < offset + drawableModulesCount; yi++)
                 {
-                    psFile += (this.QrCodeData.ModuleMatrix[xi][yi] ? "f " : "b ");
+                    psFile += (QrCodeData.ModuleMatrix[xi][yi] ? "f " : "b ");
                 }
                 psFile += "\n";
             }

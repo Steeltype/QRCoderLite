@@ -5,15 +5,15 @@ namespace Steeltype.QRCoderLite
 {
     public class QRCodeData : IDisposable
     {
-        public List<BitArray> ModuleMatrix { get; set; }
+        public List<BitArray> ModuleMatrix { get; private set; }
 
         public QRCodeData(int version)
         {
-            this.Version = version;
+            Version = version;
             var size = ModulesPerSideFromVersion(version);
-            this.ModuleMatrix = new List<BitArray>();
+            ModuleMatrix = new List<BitArray>();
             for (var i = 0; i < size; i++)
-                this.ModuleMatrix.Add(new BitArray(size));
+                ModuleMatrix.Add(new BitArray(size));
         }
 
         public QRCodeData(byte[] rawData, Compression compressMode)
@@ -25,9 +25,9 @@ namespace Steeltype.QRCoderLite
             {
                 using var input = new MemoryStream(bytes.ToArray());
                 using var output = new MemoryStream();
-                using (var dstream = new DeflateStream(input, CompressionMode.Decompress))
+                using (var decompressedStream = new DeflateStream(input, CompressionMode.Decompress))
                 {
-                    dstream.CopyTo(output);
+                    decompressedStream.CopyTo(output);
                 }
                 bytes = new List<byte>(output.ToArray());
             }
@@ -35,40 +35,40 @@ namespace Steeltype.QRCoderLite
             {
                 using var input = new MemoryStream(bytes.ToArray());
                 using var output = new MemoryStream();
-                using (var dstream = new GZipStream(input, CompressionMode.Decompress))
+                using (var decompressedStream = new GZipStream(input, CompressionMode.Decompress))
                 {
-                    dstream.CopyTo(output);
+                    decompressedStream.CopyTo(output);
                 }
                 bytes = new List<byte>(output.ToArray());
             }
 
             if (bytes[0] != 0x51 || bytes[1] != 0x52 || bytes[2] != 0x52)
-                throw new Exception("Invalid raw data file. Filetype doesn't match \"QRR\".");
+                throw new Exception("Invalid raw data file. File type doesn't match \"QRR\".");
 
             //Set QR code version
             var sideLen = (int)bytes[4];
             bytes.RemoveRange(0, 5);
-            this.Version = (sideLen - 21 - 8) / 4 + 1;
+            Version = (sideLen - 21 - 8) / 4 + 1;
 
             //Unpack
             var modules = new Queue<bool>(8 * bytes.Count);
             foreach (var b in bytes)
             {
                 var bArr = new BitArray(new byte[] { b });
-                for (int i = 7; i >= 0; i--)
+                for (var i = 7; i >= 0; i--)
                 {
                     modules.Enqueue((b & (1 << i)) != 0);
                 }
             }
 
             //Build module matrix
-            this.ModuleMatrix = new List<BitArray>(sideLen);
-            for (int y = 0; y < sideLen; y++)
+            ModuleMatrix = new List<BitArray>(sideLen);
+            for (var y = 0; y < sideLen; y++)
             {
-                this.ModuleMatrix.Add(new BitArray(sideLen));
-                for (int x = 0; x < sideLen; x++)
+                ModuleMatrix.Add(new BitArray(sideLen));
+                for (var x = 0; x < sideLen; x++)
                 {
-                    this.ModuleMatrix[y][x] = modules.Dequeue();
+                    ModuleMatrix[y][x] = modules.Dequeue();
                 }
             }
 
@@ -93,7 +93,7 @@ namespace Steeltype.QRCoderLite
                     dataQueue.Enqueue((bool)module ? 1 : 0);
                 }
             }
-            for (int i = 0; i < 8 - (ModuleMatrix.Count * ModuleMatrix.Count) % 8; i++)
+            for (var i = 0; i < 8 - (ModuleMatrix.Count * ModuleMatrix.Count) % 8; i++)
             {
                 dataQueue.Enqueue(0);
             }
@@ -102,7 +102,7 @@ namespace Steeltype.QRCoderLite
             while (dataQueue.Count > 0)
             {
                 byte b = 0;
-                for (int i = 7; i >= 0; i--)
+                for (var i = 7; i >= 0; i--)
                 {
                     b += (byte)(dataQueue.Dequeue() << i);
                 }
@@ -114,16 +114,16 @@ namespace Steeltype.QRCoderLite
             if (compressMode == Compression.Deflate)
             {
                 using var output = new MemoryStream();
-                using (var dstream = new DeflateStream(output, CompressionMode.Compress))
+                using (var decompressedStream = new DeflateStream(output, CompressionMode.Compress))
                 {
-                    dstream.Write(rawData, 0, rawData.Length);
+                    decompressedStream.Write(rawData, 0, rawData.Length);
                 }
                 rawData = output.ToArray();
             }
             else if (compressMode == Compression.GZip)
             {
                 using var output = new MemoryStream();
-                using (GZipStream gzipStream = new GZipStream(output, CompressionMode.Compress, true))
+                using (var gzipStream = new GZipStream(output, CompressionMode.Compress, true))
                 {
                     gzipStream.Write(rawData, 0, rawData.Length);
                 }
@@ -146,8 +146,8 @@ namespace Steeltype.QRCoderLite
 
         public void Dispose()
         {
-            this.ModuleMatrix = null;
-            this.Version = 0;
+            ModuleMatrix = null;
+            Version = 0;
 
         }
 

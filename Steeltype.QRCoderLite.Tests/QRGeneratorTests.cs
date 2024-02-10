@@ -18,10 +18,10 @@ namespace Steeltype.QRCoderLite.Tests
 
             var checkString = string.Empty;
             var gField = gen.GetType().GetField("galoisField", BindingFlags.NonPublic | BindingFlags.Static);
-            foreach (var listitem in (System.Collections.IEnumerable)gField.GetValue(gen))
+            foreach (var listitem in (IEnumerable)gField.GetValue(gen))
             {
                 foreach (PropertyInfo prop in listitem.GetType().GetProperties())
-                    checkString += prop.GetValue(listitem, null).ToString() + ",";
+                    checkString += prop.GetValue(listitem, null) + ",";
 
                 checkString += ":";
             }

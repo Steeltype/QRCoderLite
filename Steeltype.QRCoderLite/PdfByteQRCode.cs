@@ -18,31 +18,6 @@ namespace Steeltype.QRCoderLite
         public PdfByteQRCode(QRCodeData data) : base(data) { }
 
         /// <summary>
-        /// Creates a PDF document with a black & white QR code
-        /// </summary>
-        /// <param name="pixelsPerModule"></param>
-        /// <returns></returns>
-        public byte[] GetGraphic(int pixelsPerModule)
-        {
-            return GetGraphic(pixelsPerModule, "#000000", "#ffffff");
-        }
-
-        /// <summary>
-        /// Takes hexadecimal color string #000000 and returns byte[]{ 0, 0, 0 }
-        /// </summary>
-        /// <param name="colorString">Color in HEX format like #ffffff</param>
-        /// <returns></returns>
-        private byte[] HexColorToByteArray(string colorString)
-        {
-            if (colorString.StartsWith("#"))
-                colorString = colorString.Substring(1);
-            byte[] byteColor = new byte[colorString.Length / 2];
-            for (int i = 0; i < byteColor.Length; i++)
-                byteColor[i] = byte.Parse(colorString.Substring(i * 2, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
-            return byteColor;
-        }
-
-        /// <summary>
         /// Creates a PDF document with given colors DPI and quality
         /// </summary>
         /// <param name="pixelsPerModule"></param>
@@ -51,7 +26,7 @@ namespace Steeltype.QRCoderLite
         /// <param name="dpi"></param>
         /// <param name="jpgQuality"></param>
         /// <returns></returns>
-        public byte[] GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, int dpi = 150, long jpgQuality = 85)
+        public byte[] GetGraphic(int pixelsPerModule, string darkColorHtmlHex = "#000000", string lightColorHtmlHex = "#ffffff", int dpi = 150, long jpgQuality = 85)
         {
             byte[] jpgArray = null, pngArray = null;
             var imgSize = QrCodeData.ModuleMatrix.Count * pixelsPerModule;
@@ -60,7 +35,7 @@ namespace Steeltype.QRCoderLite
             //Get QR code image
             using (var qrCode = new PngByteQRCode(QrCodeData))
             {
-                pngArray = qrCode.GetGraphic(pixelsPerModule, HexColorToByteArray(darkColorHtmlHex), HexColorToByteArray(lightColorHtmlHex));
+                pngArray = qrCode.GetGraphic(pixelsPerModule, Utilities.HexColorToByteArray(darkColorHtmlHex), Utilities.HexColorToByteArray(lightColorHtmlHex));
             }
 
             // Convert PNG byte array to SKBitmap
@@ -83,127 +58,64 @@ namespace Steeltype.QRCoderLite
                 jpgArray = msJpeg.ToArray();
             }
 
-            //Create PDF document
-            using (var stream = new MemoryStream())
-            {
-                var writer = new StreamWriter(stream, System.Text.Encoding.GetEncoding("ASCII"));
+            // Create PDF document
+            using var stream = new MemoryStream();
+            var writer = new StreamWriter(stream, System.Text.Encoding.GetEncoding("ASCII"));
+            var xrefs = new List<long>(); // Cross-reference table for PDF objects
 
-                var xrefs = new List<long>();
+            // Write PDF header
+            writer.Write("%PDF-1.5\r\n");
+            writer.Flush();
 
-                writer.Write("%PDF-1.5\r\n");
-                writer.Flush();
+            // Binary comment to ensure the file is treated as binary
+            stream.Write(pdfBinaryComment, 0, pdfBinaryComment.Length);
+            writer.WriteLine();
 
-                stream.Write(pdfBinaryComment, 0, pdfBinaryComment.Length);
-                writer.WriteLine();
+            // Add first object: Root Catalog
+            writer.Flush(); // Flush to get an accurate position
+            xrefs.Add(stream.Position); // Record position for xref table
+            writer.Write($"{1} 0 obj\r\n<<\r\n/Type /Catalog\r\n/Pages 2 0 R\r\n>>\r\nendobj\r\n");
 
-                writer.Flush();
-                xrefs.Add(stream.Position);
+            // Add second object: Page Tree (Pages dictionary)
+            writer.Flush(); // Flush to get an accurate position
+            xrefs.Add(stream.Position); // Record position for xref table
+            writer.Write($"{2} 0 obj\r\n<<\r\n/Count 1\r\n/Kids [3 0 R]\r\n>>\r\nendobj\r\n");
 
-                writer.Write(
-                    xrefs.Count.ToString() + " 0 obj\r\n" +
-                    "<<\r\n" +
-                    "/Type /Catalog\r\n" +
-                    "/Pages 2 0 R\r\n" +
-                    ">>\r\n" +
-                    "endobj\r\n"
-                );
+            // Add third object: Page
+            writer.Flush(); // Flush to get an accurate position
+            xrefs.Add(stream.Position); // Record position for xref table
+            // Define a page with media size and reference to the content stream and resources
+            writer.Write($"{3} 0 obj\r\n<<\r\n/Type /Page\r\n/Parent 2 0 R\r\n/MediaBox [0 0 {pdfMediaSize} {pdfMediaSize}]\r\n/Contents 4 0 R\r\n/Resources << /ProcSet [/PDF /ImageC] /XObject << /Im1 5 0 R >> >>\r\n>>\r\nendobj\r\n");
 
-                writer.Flush();
-                xrefs.Add(stream.Position);
+            // Add fourth object: Content Stream (how to draw the image)
+            var contentStream = $"q\r\n{pdfMediaSize} 0 0 {pdfMediaSize} 0 0 cm\r\n/Im1 Do\r\nQ";
+            writer.Flush(); // Flush to get an accurate position
+            xrefs.Add(stream.Position); // Record position for xref table
+            writer.Write($"{4} 0 obj\r\n<< /Length {contentStream.Length} >>\r\nstream\r\n{contentStream}\r\nendstream\r\nendobj\r\n");
 
-                writer.Write(
-                    xrefs.Count.ToString() + " 0 obj\r\n" +
-                    "<<\r\n" +
-                    "/Count 1\r\n" +
-                    "/Kids [ <<\r\n" +
-                    "/Type /Page\r\n" +
-                    "/Parent 2 0 R\r\n" +
-                    "/MediaBox [0 0 " + pdfMediaSize + " " + pdfMediaSize + "]\r\n" +
-                    "/Resources << /ProcSet [ /PDF /ImageC ]\r\n" +
-                    "/XObject << /Im1 4 0 R >> >>\r\n" +
-                    "/Contents 3 0 R\r\n" +
-                    ">> ]\r\n" +
-                    ">>\r\n" +
-                    "endobj\r\n"
-                );
+            // Add fifth object: Embedded Image
+            writer.Flush(); // Flush to get an accurate position
+            xrefs.Add(stream.Position); // Record position for xref table
+            writer.Write($"{5} 0 obj\r\n<<\r\n/Type /XObject\r\n/Subtype /Image\r\n/Width {imgSize}\r\n/Height {imgSize}\r\n/Length {jpgArray.Length}\r\n/Filter /DCTDecode\r\n/ColorSpace /DeviceRGB\r\n/BitsPerComponent 8\r\n>>\r\nstream\r\n");
+            writer.Flush(); // Flush before writing binary data
+            stream.Write(jpgArray, 0, jpgArray.Length); // Write the JPEG binary data
+            writer.Write("\r\nendstream\r\nendobj\r\n");
 
-                var X = "q\r\n" +
-                    pdfMediaSize + " 0 0 " + pdfMediaSize + " 0 0 cm\r\n" +
-                    "/Im1 Do\r\n" +
-                    "Q";
+            // Finalize document with xref table, trailer, and EOF
+            writer.Flush();
+            xrefs.Add(stream.Position); // Record position for the length of JPEG data
+            writer.Write($"{6} 0 obj\r\n{jpgArray.Length}\r\nendobj\r\n");
+            var startxref = stream.Position; // Record start of xref table
+            writer.Write("xref\r\n0 " + (xrefs.Count + 1) + "\r\n0000000000 65535 f\r\n");
+            foreach (var refValue in xrefs)
+                writer.Write($"{refValue:0000000000} 00000 n\r\n"); // Write each object's position
+            // Write trailer and EOF
+            writer.Write($"trailer\r\n<<\r\n/Size {xrefs.Count + 1}\r\n/Root 1 0 R\r\n>>\r\nstartxref\r\n{startxref}\r\n%%EOF");
+            writer.Flush(); // Ensure all data is written to stream
 
-                writer.Flush();
-                xrefs.Add(stream.Position);
+            stream.Position = 0;
 
-                writer.Write(
-                    xrefs.Count.ToString() + " 0 obj\r\n" +
-                    "<< /Length " + X.Length.ToString() + " >>\r\n" +
-                    "stream\r\n" +
-                    X + "endstream\r\n" +
-                    "endobj\r\n"
-                );
-
-                writer.Flush();
-                xrefs.Add(stream.Position);
-
-                writer.Write(
-                    xrefs.Count.ToString() + " 0 obj\r\n" +
-                    "<<\r\n" +
-                    "/Name /Im1\r\n" +
-                    "/Type /XObject\r\n" +
-                    "/Subtype /Image\r\n" +
-                    "/Width " + imgSize.ToString() + "/Height " + imgSize.ToString() + "/Length 5 0 R\r\n" +
-                    "/Filter /DCTDecode\r\n" +
-                    "/ColorSpace /DeviceRGB\r\n" +
-                    "/BitsPerComponent 8\r\n" +
-                    ">>\r\n" +
-                    "stream\r\n"
-                );
-                writer.Flush();
-                stream.Write(jpgArray, 0, jpgArray.Length);
-                writer.Write(
-                    "\r\n" +
-                    "endstream\r\n" +
-                    "endobj\r\n"
-                );
-
-                writer.Flush();
-                xrefs.Add(stream.Position);
-
-                writer.Write(
-                    xrefs.Count.ToString() + " 0 obj\r\n" +
-                    jpgArray.Length.ToString() + " endobj\r\n"
-                );
-
-                writer.Flush();
-                var startxref = stream.Position;
-
-                writer.Write(
-                    "xref\r\n" +
-                    "0 " + (xrefs.Count + 1).ToString() + "\r\n" +
-                    "0000000000 65535 f\r\n"
-                );
-
-                foreach (var refValue in xrefs)
-                    writer.Write(refValue.ToString("0000000000") + " 00000 n\r\n");
-
-                writer.Write(
-                    "trailer\r\n" +
-                    "<<\r\n" +
-                    "/Size " + (xrefs.Count + 1).ToString() + "\r\n" +
-                    "/Root 1 0 R\r\n" +
-                    ">>\r\n" +
-                    "startxref\r\n" +
-                    startxref.ToString() + "\r\n" +
-                    "%%EOF"
-                );
-
-                writer.Flush();
-
-                stream.Position = 0;
-
-                return stream.ToArray();
-            }
+            return stream.ToArray();
         }
     }
 

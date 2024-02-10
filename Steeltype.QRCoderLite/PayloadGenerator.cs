@@ -8,9 +8,9 @@ namespace Steeltype.QRCoderLite
     {
         public abstract class Payload
         {
-            public virtual int Version { get { return -1; } }
-            public virtual QRCodeGenerator.ECCLevel EccLevel { get { return QRCodeGenerator.ECCLevel.M; } }
-            public virtual QRCodeGenerator.EciMode EciMode { get { return QRCodeGenerator.EciMode.Default; } }
+            public virtual int Version => -1;
+            public virtual QRCodeGenerator.ECCLevel EccLevel => QRCodeGenerator.ECCLevel.M;
+            public virtual QRCodeGenerator.EciMode EciMode => QRCodeGenerator.EciMode.Default;
             public abstract override string ToString();
         }
 
@@ -30,24 +30,24 @@ namespace Steeltype.QRCoderLite
             public WiFi(string ssid, string password, Authentication authenticationMode, bool isHiddenSSID = false, bool escapeHexStrings = true)
             {
                 this.ssid = EscapeInput(ssid);
-                this.ssid = escapeHexStrings && isHexStyle(this.ssid) ? "\"" + this.ssid + "\"" : this.ssid;
+                this.ssid = escapeHexStrings && IsHexStyle(this.ssid) ? "\"" + this.ssid + "\"" : this.ssid;
                 this.password = EscapeInput(password);
-                this.password = escapeHexStrings && isHexStyle(this.password) ? "\"" + this.password + "\"" : this.password;
+                this.password = escapeHexStrings && IsHexStyle(this.password) ? "\"" + this.password + "\"" : this.password;
                 this.authenticationMode = authenticationMode.ToString();
-                this.isHiddenSsid = isHiddenSSID;
+                isHiddenSsid = isHiddenSSID;
             }
 
             public override string ToString()
             {
                 return
-                    $"WIFI:T:{this.authenticationMode};S:{this.ssid};P:{this.password};{(this.isHiddenSsid ? "H:true" : string.Empty)};";
+                    $"WIFI:T:{authenticationMode};S:{ssid};P:{password};{(isHiddenSsid ? "H:true" : string.Empty)};";
             }
 
             public enum Authentication
             {
                 WEP,
                 WPA,
-                nopass
+                Nopass
             }
         }
 
@@ -75,22 +75,22 @@ namespace Steeltype.QRCoderLite
             public override string ToString()
             {
                 var returnVal = string.Empty;
-                switch (this.encoding)
+                switch (encoding)
                 {
                     case MailEncoding.MAILTO:
                         var parts = new List<string>();
-                        if (!string.IsNullOrEmpty(this.subject))
-                            parts.Add("subject=" + Uri.EscapeDataString(this.subject));
-                        if (!string.IsNullOrEmpty(this.message))
-                            parts.Add("body=" + Uri.EscapeDataString(this.message));
+                        if (!string.IsNullOrEmpty(subject))
+                            parts.Add("subject=" + Uri.EscapeDataString(subject));
+                        if (!string.IsNullOrEmpty(message))
+                            parts.Add("body=" + Uri.EscapeDataString(message));
                         var queryString = parts.Any() ? $"?{string.Join("&", parts.ToArray())}" : "";
-                        returnVal = $"mailto:{this.mailReceiver}{queryString}";
+                        returnVal = $"mailto:{mailReceiver}{queryString}";
                         break;
                     case MailEncoding.MATMSG:
-                        returnVal = $"MATMSG:TO:{this.mailReceiver};SUB:{EscapeInput(this.subject)};BODY:{EscapeInput(this.message)};;";
+                        returnVal = $"MATMSG:TO:{mailReceiver};SUB:{EscapeInput(subject)};BODY:{EscapeInput(message)};;";
                         break;
                     case MailEncoding.SMTP:
-                        returnVal = $"SMTP:{this.mailReceiver}:{EscapeInput(this.subject, true)}:{EscapeInput(this.message, true)}";
+                        returnVal = $"SMTP:{mailReceiver}:{EscapeInput(subject, true)}:{EscapeInput(message, true)}";
                         break;
                 }
                 return returnVal;
@@ -117,7 +117,7 @@ namespace Steeltype.QRCoderLite
             public SMS(string number, SMSEncoding encoding = SMSEncoding.SMS)
             {
                 this.number = number;
-                this.subject = string.Empty;
+                subject = string.Empty;
                 this.encoding = encoding;
             }
 
@@ -137,22 +137,22 @@ namespace Steeltype.QRCoderLite
             public override string ToString()
             {
                 var returnVal = string.Empty;
-                switch (this.encoding)
+                switch (encoding)
                 {
                     case SMSEncoding.SMS:
                         var queryString = string.Empty;
-                        if (!string.IsNullOrEmpty(this.subject))
-                            queryString = $"?body={Uri.EscapeDataString(this.subject)}";
-                        returnVal = $"sms:{this.number}{queryString}";
+                        if (!string.IsNullOrEmpty(subject))
+                            queryString = $"?body={Uri.EscapeDataString(subject)}";
+                        returnVal = $"sms:{number}{queryString}";
                         break;
                     case SMSEncoding.SMS_iOS:
                         var queryStringiOS = string.Empty;
-                        if (!string.IsNullOrEmpty(this.subject))
-                            queryStringiOS = $";body={Uri.EscapeDataString(this.subject)}";
-                        returnVal = $"sms:{this.number}{queryStringiOS}";
+                        if (!string.IsNullOrEmpty(subject))
+                            queryStringiOS = $";body={Uri.EscapeDataString(subject)}";
+                        returnVal = $"sms:{number}{queryStringiOS}";
                         break;
                     case SMSEncoding.SMSTO:
-                        returnVal = $"SMSTO:{this.number}:{this.subject}";
+                        returnVal = $"SMSTO:{number}:{subject}";
                         break;
                 }
                 return returnVal;
@@ -179,7 +179,7 @@ namespace Steeltype.QRCoderLite
             public MMS(string number, MMSEncoding encoding = MMSEncoding.MMS)
             {
                 this.number = number;
-                this.subject = string.Empty;
+                subject = string.Empty;
                 this.encoding = encoding;
             }
 
@@ -199,19 +199,19 @@ namespace Steeltype.QRCoderLite
             public override string ToString()
             {
                 var returnVal = string.Empty;
-                switch (this.encoding)
+                switch (encoding)
                 {
                     case MMSEncoding.MMSTO:
                         var queryStringMmsTo = string.Empty;
-                        if (!string.IsNullOrEmpty(this.subject))
-                            queryStringMmsTo = $"?subject={Uri.EscapeDataString(this.subject)}";
-                        returnVal = $"mmsto:{this.number}{queryStringMmsTo}";
+                        if (!string.IsNullOrEmpty(subject))
+                            queryStringMmsTo = $"?subject={Uri.EscapeDataString(subject)}";
+                        returnVal = $"mmsto:{number}{queryStringMmsTo}";
                         break;
                     case MMSEncoding.MMS:
                         var queryStringMms = string.Empty;
-                        if (!string.IsNullOrEmpty(this.subject))
-                            queryStringMms = $"?body={Uri.EscapeDataString(this.subject)}";
-                        returnVal = $"mms:{this.number}{queryStringMms}";
+                        if (!string.IsNullOrEmpty(subject))
+                            queryStringMms = $"?body={Uri.EscapeDataString(subject)}";
+                        returnVal = $"mms:{number}{queryStringMms}";
                         break;
                 }
                 return returnVal;
@@ -244,12 +244,12 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                switch (this.encoding)
+                switch (encoding)
                 {
                     case GeolocationEncoding.GEO:
-                        return $"geo:{this.latitude},{this.longitude}";
+                        return $"geo:{latitude},{longitude}";
                     case GeolocationEncoding.GoogleMaps:
-                        return $"http://maps.google.com/maps?q={this.latitude},{this.longitude}";
+                        return $"http://maps.google.com/maps?q={latitude},{longitude}";
                     default:
                         return "geo:";
                 }
@@ -277,7 +277,7 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                return $"tel:{this.number}";
+                return $"tel:{number}";
             }
         }
 
@@ -296,7 +296,7 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                return $"skype:{this.skypeUsername}?call";
+                return $"skype:{skypeUsername}?call";
             }
         }
 
@@ -315,7 +315,7 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                return (!this.url.StartsWith("http") ? "http://" + this.url : this.url);
+                return (!url.StartsWith("http") ? "http://" + url : url);
             }
         }
 
@@ -344,13 +344,13 @@ namespace Steeltype.QRCoderLite
             /// <param name="message">The message</param>
             public WhatsAppMessage(string message)
             {
-                this.number = string.Empty;
+                number = string.Empty;
                 this.message = message;
             }
 
             public override string ToString()
             {
-                var cleanedPhone = Regex.Replace(this.number, @"^[0+]+|[ ()-]", string.Empty);
+                var cleanedPhone = Regex.Replace(number, @"^[0+]+|[ ()-]", string.Empty);
                 return ($"https://wa.me/{cleanedPhone}?text={Uri.EscapeDataString(message)}");
             }
         }
@@ -373,7 +373,7 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                return $"MEBKM:TITLE:{this.title};URL:{this.url};;";
+                return $"MEBKM:TITLE:{title};URL:{url};;";
             }
         }
 
@@ -407,7 +407,7 @@ namespace Steeltype.QRCoderLite
             /// <param name="outputType">Payload output type</param>
             /// <param name="firstname">The firstname</param>
             /// <param name="lastname">The lastname</param>
-            /// <param name="nickname">The displayname</param>
+            /// <param name="nickname">The display name</param>
             /// <param name="phone">Normal phone number</param>
             /// <param name="mobilePhone">Mobile phone</param>
             /// <param name="workPhone">Office phone number</param>
@@ -415,7 +415,7 @@ namespace Steeltype.QRCoderLite
             /// <param name="birthday">Birthday</param>
             /// <param name="website">Website / Homepage</param>
             /// <param name="street">Street</param>
-            /// <param name="houseNumber">Housenumber</param>
+            /// <param name="houseNumber">House number</param>
             /// <param name="city">City</param>
             /// <param name="stateRegion">State or Region</param>
             /// <param name="zipCode">Zip code</param>
@@ -450,7 +450,7 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                string payload = string.Empty;
+                var payload = string.Empty;
                 if (outputType == ContactOutputType.MeCard)
                 {
                     payload += "MECARD+\r\n";
@@ -474,7 +474,7 @@ namespace Steeltype.QRCoderLite
                         payload += $"NOTE:{note}\r\n";
                     if (birthday != null)
                         payload += $"BDAY:{((DateTime)birthday).ToString("yyyyMMdd")}\r\n";
-                    string addressString = string.Empty;
+                    var addressString = string.Empty;
                     if (addressOrder == AddressOrder.Default)
                     {
                         addressString = $"ADR:,,{(!string.IsNullOrEmpty(street) ? street + " " : "")}{(!string.IsNullOrEmpty(houseNumber) ? houseNumber : "")},{(!string.IsNullOrEmpty(zipCode) ? zipCode : "")},{(!string.IsNullOrEmpty(city) ? city : "")},{(!string.IsNullOrEmpty(stateRegion) ? stateRegion : "")},{(!string.IsNullOrEmpty(country) ? country : "")}\r\n";
@@ -555,7 +555,7 @@ namespace Steeltype.QRCoderLite
                         payload += "TYPE=HOME,PREF:";
                     else
                         payload += "TYPE=home,pref:";
-                    string addressString = string.Empty;
+                    var addressString = string.Empty;
                     if (addressOrder == AddressOrder.Default)
                     {
                         addressString = $";;{(!string.IsNullOrEmpty(street) ? street + " " : "")}{(!string.IsNullOrEmpty(houseNumber) ? houseNumber : "")};{(!string.IsNullOrEmpty(zipCode) ? zipCode : "")};{(!string.IsNullOrEmpty(city) ? city : "")};{(!string.IsNullOrEmpty(stateRegion) ? stateRegion : "")};{(!string.IsNullOrEmpty(country) ? country : "")}\r\n";
@@ -614,13 +614,13 @@ namespace Steeltype.QRCoderLite
             private readonly double? amount;
 
             /// <summary>
-            /// Generates a Bitcoin like cryptocurrency payment payload. QR Codes with this payload can open a payment app.
+            /// Generates a Bitcoin like crypto-currency payment payload. QR Codes with this payload can open a payment app.
             /// </summary>
-            /// <param name="currencyName">Bitcoin like cryptocurrency address of the payment receiver</param>
-            /// <param name="address">Bitcoin like cryptocurrency address of the payment receiver</param>
+            /// <param name="currencyName">Bitcoin like crypto-currency address of the payment receiver</param>
+            /// <param name="address">Bitcoin like crypto-currency address of the payment receiver</param>
             /// <param name="amount">Amount of coins to transfer</param>
             /// <param name="label">Reference label</param>
-            /// <param name="message">Referece text aka message</param>
+            /// <param name="message">Reference text aka message</param>
             public BitcoinLikeCryptoCurrencyAddress(BitcoinLikeCryptoCurrencyType currencyType, string address, double? amount, string label = null, string message = null)
             {
                 this.currencyType = currencyType;
@@ -644,9 +644,9 @@ namespace Steeltype.QRCoderLite
                 string query = null;
 
                 var queryValues = new KeyValuePair<string, string>[]{
-                  new KeyValuePair<string, string>(nameof(label), label),
-                  new KeyValuePair<string, string>(nameof(message), message),
-                  new KeyValuePair<string, string>(nameof(amount), amount.HasValue ? amount.Value.ToString("#.########", CultureInfo.InvariantCulture) : null)
+                  new(nameof(label), label),
+                  new(nameof(message), message),
+                  new(nameof(amount), amount.HasValue ? amount.Value.ToString("#.########", CultureInfo.InvariantCulture) : null)
                 };
 
                 if (queryValues.Any(keyPair => !string.IsNullOrEmpty(keyPair.Value)))
@@ -694,7 +694,7 @@ namespace Steeltype.QRCoderLite
             //    - (en) https://www.paymentstandards.ch/dam/downloads/ig-qr-bill-en.pdf
             //Changes between version 1.0 and 2.0: https://www.paymentstandards.ch/dam/downloads/change-documentation-qrr-de.pdf
 
-            private readonly string br = "\r\n";
+            private const string Br = "\r\n";
             private readonly string alternativeProcedure1, alternativeProcedure2;
             private readonly Iban iban;
             private readonly decimal? amount;
@@ -750,7 +750,7 @@ namespace Steeltype.QRCoderLite
 
             public class AdditionalInformation
             {
-                private readonly string unstructuredMessage, billInformation, trailer;
+                private readonly string unstructuredMessage, billInformation;
 
                 /// <summary>
                 /// Creates an additional information object. Both parameters are optional and must be shorter than 141 chars in combination.
@@ -763,24 +763,14 @@ namespace Steeltype.QRCoderLite
                         throw new SwissQrCodeAdditionalInformationException("Unstructured message and bill information must be shorter than 141 chars in total/combined.");
                     this.unstructuredMessage = unstructuredMessage;
                     this.billInformation = billInformation;
-                    this.trailer = "EPD";
+                    Trailer = "EPD";
                 }
 
-                public string UnstructureMessage
-                {
-                    get { return !string.IsNullOrEmpty(unstructuredMessage) ? unstructuredMessage.Replace("\n", "") : null; }
-                }
+                public string UnstructuredMessage => !string.IsNullOrEmpty(unstructuredMessage) ? unstructuredMessage.Replace("\n", "") : null;
 
-                public string BillInformation
-                {
-                    get { return !string.IsNullOrEmpty(billInformation) ? billInformation.Replace("\n", "") : null; }
-                }
+                public string BillInformation => !string.IsNullOrEmpty(billInformation) ? billInformation.Replace("\n", "") : null;
 
-                public string Trailer
-                {
-                    get { return trailer; }
-                }
-
+                public string Trailer { get; }
 
                 public class SwissQrCodeAdditionalInformationException : Exception
                 {
@@ -833,15 +823,9 @@ namespace Steeltype.QRCoderLite
                     this.reference = reference;
                 }
 
-                public ReferenceType RefType
-                {
-                    get { return referenceType; }
-                }
+                public ReferenceType RefType => referenceType;
 
-                public string ReferenceText
-                {
-                    get { return !string.IsNullOrEmpty(reference) ? reference.Replace("\n", "") : null; }
-                }
+                public string ReferenceText => !string.IsNullOrEmpty(reference) ? reference.Replace("\n", "") : null;
 
                 /// <summary>
                 /// Reference type. When using a QR-IBAN you have to use either "QRR" or "SCOR"
@@ -879,8 +863,8 @@ namespace Steeltype.QRCoderLite
 
             public class Iban
             {
-                private string iban;
-                private IbanType ibanType;
+                private readonly string iban;
+                private readonly IbanType ibanType;
 
                 /// <summary>
                 /// IBAN object with type information
@@ -891,7 +875,7 @@ namespace Steeltype.QRCoderLite
                 {
                     if (ibanType == IbanType.Iban && !IsValidIban(iban))
                         throw new SwissQrCodeIbanException("The IBAN entered isn't valid.");
-                    if (ibanType == IbanType.QrIban && !IsValidQRIban(iban))
+                    if (ibanType == IbanType.QrIban && !IsValidQrIban(iban))
                         throw new SwissQrCodeIbanException("The QR-IBAN entered isn't valid.");
                     if (!iban.StartsWith("CH") && !iban.StartsWith("LI"))
                         throw new SwissQrCodeIbanException("The IBAN must start with \"CH\" or \"LI\".");
@@ -899,10 +883,7 @@ namespace Steeltype.QRCoderLite
                     this.ibanType = ibanType;
                 }
 
-                public bool IsQrIban
-                {
-                    get { return ibanType == IbanType.QrIban; }
-                }
+                public bool IsQrIban => ibanType == IbanType.QrIban;
 
                 public override string ToString()
                 {
@@ -935,37 +916,15 @@ namespace Steeltype.QRCoderLite
 
             public class Contact
             {
-                private static readonly HashSet<string> twoLetterCodes = ValidTwoLetterCodes();
-                private string br = "\r\n";
-                private string name, streetOrAddressline1, houseNumberOrAddressline2, zipCode, city, country;
-                private AddressType adrType;
-
-                /// <summary>
-                /// Contact type. Can be used for payee, ultimate payee, etc. with address in structured mode (S).
-                /// </summary>
-                /// <param name="name">Last name or company (optional first name)</param>
-                /// <param name="zipCode">Zip-/Postcode</param>
-                /// <param name="city">City name</param>
-                /// <param name="country">Two-letter country code as defined in ISO 3166-1</param>
-                /// <param name="street">Streetname without house number</param>
-                /// <param name="houseNumber">House number</param>
-                [Obsolete("This constructor is deprecated. Use WithStructuredAddress instead.")]
-                public Contact(string name, string zipCode, string city, string country, string street = null, string houseNumber = null) : this(name, zipCode, city, country, street, houseNumber, AddressType.StructuredAddress)
-                {
-                }
-
-
-                /// <summary>
-                /// Contact type. Can be used for payee, ultimate payee, etc. with address in combined mode (K).
-                /// </summary>
-                /// <param name="name">Last name or company (optional first name)</param>
-                /// <param name="country">Two-letter country code as defined in ISO 3166-1</param>
-                /// <param name="addressLine1">Adress line 1</param>
-                /// <param name="addressLine2">Adress line 2</param>
-                [Obsolete("This constructor is deprecated. Use WithCombinedAddress instead.")]
-                public Contact(string name, string country, string addressLine1, string addressLine2) : this(name, null, null, country, addressLine1, addressLine2, AddressType.CombinedAddress)
-                {
-                }
+                private static readonly HashSet<string> TwoLetterCodes = ValidTwoLetterCodes();
+                private const string Br = "\r\n";
+                private readonly string name;
+                private readonly string streetOrAddressline1;
+                private readonly string houseNumberOrAddressline2;
+                private readonly string zipCode;
+                private readonly string city;
+                private readonly string country;
+                private readonly AddressType adrType;
 
                 public static Contact WithStructuredAddress(string name, string zipCode, string city, string country, string street = null, string houseNumber = null)
                 {
@@ -977,13 +936,12 @@ namespace Steeltype.QRCoderLite
                     return new Contact(name, null, null, country, addressLine1, addressLine2, AddressType.CombinedAddress);
                 }
 
-
                 private Contact(string name, string zipCode, string city, string country, string streetOrAddressline1, string houseNumberOrAddressline2, AddressType addressType)
                 {
                     //Pattern extracted from https://qr-validation.iso-payments.ch as explained in https://github.com/codebude/QRCoder/issues/97
                     var charsetPattern = @"^([a-zA-Z0-9\.,;:'\ \+\-/\(\)?\*\[\]\{\}\\`´~ ]|[!""#%&<>÷=@_$£]|[àáâäçèéêëìíîïñòóôöùúûüýßÀÁÂÄÇÈÉÊËÌÍÎÏÒÓÔÖÙÚÛÜÑ])*$";
 
-                    this.adrType = addressType;
+                    adrType = addressType;
 
                     if (string.IsNullOrEmpty(name))
                         throw new SwissQrCodeContactException("Name must not be empty.");
@@ -993,7 +951,7 @@ namespace Steeltype.QRCoderLite
                         throw new SwissQrCodeContactException($"Name must match the following pattern as defined in pain.001: {charsetPattern}");
                     this.name = name;
 
-                    if (AddressType.StructuredAddress == this.adrType)
+                    if (AddressType.StructuredAddress == adrType)
                     {
                         if (!string.IsNullOrEmpty(streetOrAddressline1) && (streetOrAddressline1.Length > 70))
                             throw new SwissQrCodeContactException("Street must be shorter than 71 chars.");
@@ -1022,7 +980,7 @@ namespace Steeltype.QRCoderLite
                         this.houseNumberOrAddressline2 = houseNumberOrAddressline2;
                     }
 
-                    if (AddressType.StructuredAddress == this.adrType)
+                    if (AddressType.StructuredAddress == adrType)
                     {
                         if (string.IsNullOrEmpty(zipCode))
                             throw new SwissQrCodeContactException("Zip code must not be empty.");
@@ -1051,23 +1009,23 @@ namespace Steeltype.QRCoderLite
                     this.country = country;
                 }
 
-                private static bool IsValidTwoLetterCode(string code) => twoLetterCodes.Contains(code);
+                private static bool IsValidTwoLetterCode(string code) => TwoLetterCodes.Contains(code);
 
                 private static HashSet<string> ValidTwoLetterCodes()
                 {
-                    string[] codes = new string[] { "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS", "BH", "BD", "BB", "BY", "BE", "BZ", "BJ", "BM", "BT", "BO", "BQ", "BA", "BW", "BV", "BR", "IO", "BN", "BG", "BF", "BI", "CV", "KH", "CM", "CA", "KY", "CF", "TD", "CL", "CN", "CX", "CC", "CO", "KM", "CG", "CD", "CK", "CR", "CI", "HR", "CU", "CW", "CY", "CZ", "DK", "DJ", "DM", "DO", "EC", "EG", "SV", "GQ", "ER", "EE", "SZ", "ET", "FK", "FO", "FJ", "FI", "FR", "GF", "PF", "TF", "GA", "GM", "GE", "DE", "GH", "GI", "GR", "GL", "GD", "GP", "GU", "GT", "GG", "GN", "GW", "GY", "HT", "HM", "VA", "HN", "HK", "HU", "IS", "IN", "ID", "IR", "IQ", "IE", "IM", "IL", "IT", "JM", "JP", "JE", "JO", "KZ", "KE", "KI", "KP", "KR", "KW", "KG", "LA", "LV", "LB", "LS", "LR", "LY", "LI", "LT", "LU", "MO", "MG", "MW", "MY", "MV", "ML", "MT", "MH", "MQ", "MR", "MU", "YT", "MX", "FM", "MD", "MC", "MN", "ME", "MS", "MA", "MZ", "MM", "NA", "NR", "NP", "NL", "NC", "NZ", "NI", "NE", "NG", "NU", "NF", "MP", "MK", "NO", "OM", "PK", "PW", "PS", "PA", "PG", "PY", "PE", "PH", "PN", "PL", "PT", "PR", "QA", "RE", "RO", "RU", "RW", "BL", "SH", "KN", "LC", "MF", "PM", "VC", "WS", "SM", "ST", "SA", "SN", "RS", "SC", "SL", "SG", "SX", "SK", "SI", "SB", "SO", "ZA", "GS", "SS", "ES", "LK", "SD", "SR", "SJ", "SE", "CH", "SY", "TW", "TJ", "TZ", "TH", "TL", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG", "UA", "AE", "GB", "US", "UM", "UY", "UZ", "VU", "VE", "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW", "AX" };
+                    var codes = new string[] { "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS", "BH", "BD", "BB", "BY", "BE", "BZ", "BJ", "BM", "BT", "BO", "BQ", "BA", "BW", "BV", "BR", "IO", "BN", "BG", "BF", "BI", "CV", "KH", "CM", "CA", "KY", "CF", "TD", "CL", "CN", "CX", "CC", "CO", "KM", "CG", "CD", "CK", "CR", "CI", "HR", "CU", "CW", "CY", "CZ", "DK", "DJ", "DM", "DO", "EC", "EG", "SV", "GQ", "ER", "EE", "SZ", "ET", "FK", "FO", "FJ", "FI", "FR", "GF", "PF", "TF", "GA", "GM", "GE", "DE", "GH", "GI", "GR", "GL", "GD", "GP", "GU", "GT", "GG", "GN", "GW", "GY", "HT", "HM", "VA", "HN", "HK", "HU", "IS", "IN", "ID", "IR", "IQ", "IE", "IM", "IL", "IT", "JM", "JP", "JE", "JO", "KZ", "KE", "KI", "KP", "KR", "KW", "KG", "LA", "LV", "LB", "LS", "LR", "LY", "LI", "LT", "LU", "MO", "MG", "MW", "MY", "MV", "ML", "MT", "MH", "MQ", "MR", "MU", "YT", "MX", "FM", "MD", "MC", "MN", "ME", "MS", "MA", "MZ", "MM", "NA", "NR", "NP", "NL", "NC", "NZ", "NI", "NE", "NG", "NU", "NF", "MP", "MK", "NO", "OM", "PK", "PW", "PS", "PA", "PG", "PY", "PE", "PH", "PN", "PL", "PT", "PR", "QA", "RE", "RO", "RU", "RW", "BL", "SH", "KN", "LC", "MF", "PM", "VC", "WS", "SM", "ST", "SA", "SN", "RS", "SC", "SL", "SG", "SX", "SK", "SI", "SB", "SO", "ZA", "GS", "SS", "ES", "LK", "SD", "SR", "SJ", "SE", "CH", "SY", "TW", "TJ", "TZ", "TH", "TL", "TG", "TK", "TO", "TT", "TN", "TR", "TM", "TC", "TV", "UG", "UA", "AE", "GB", "US", "UM", "UY", "UZ", "VU", "VE", "VN", "VG", "VI", "WF", "EH", "YE", "ZM", "ZW", "AX" };
                     return new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
                 }
 
                 public override string ToString()
                 {
-                    string contactData = $"{(AddressType.StructuredAddress == adrType ? "S" : "K")}{br}"; //AdrTp
-                    contactData += name.Replace("\n", "") + br; //Name
-                    contactData += (!string.IsNullOrEmpty(streetOrAddressline1) ? streetOrAddressline1.Replace("\n", "") : string.Empty) + br; //StrtNmOrAdrLine1
-                    contactData += (!string.IsNullOrEmpty(houseNumberOrAddressline2) ? houseNumberOrAddressline2.Replace("\n", "") : string.Empty) + br; //BldgNbOrAdrLine2
-                    contactData += zipCode.Replace("\n", "") + br; //PstCd
-                    contactData += city.Replace("\n", "") + br; //TwnNm
-                    contactData += country + br; //Ctry
+                    var contactData = $"{(AddressType.StructuredAddress == adrType ? "S" : "K")}{Br}"; // AdrTp
+                    contactData += name.Replace("\n", "") + Br; // Name
+                    contactData += (!string.IsNullOrEmpty(streetOrAddressline1) ? streetOrAddressline1.Replace("\n", "") : string.Empty) + Br; // StrtNmOrAdrLine1
+                    contactData += (!string.IsNullOrEmpty(houseNumberOrAddressline2) ? houseNumberOrAddressline2.Replace("\n", "") : string.Empty) + Br; // BldgNbOrAdrLine2
+                    contactData += zipCode.Replace("\n", "") + Br; // PstCd
+                    contactData += city.Replace("\n", "") + Br; // TwnNm
+                    contactData += country + Br; // Ctry
                     return contactData;
                 }
 
@@ -1098,61 +1056,58 @@ namespace Steeltype.QRCoderLite
             public override string ToString()
             {
                 //Header "logical" element
-                var SwissQrCodePayload = "SPC" + br; //QRType
-                SwissQrCodePayload += "0200" + br; //Version
-                SwissQrCodePayload += "1" + br; //Coding
+                var swissQrCodePayload = "SPC" + Br; //QRType
+                swissQrCodePayload += "0200" + Br; //Version
+                swissQrCodePayload += "1" + Br; //Coding
 
                 //CdtrInf "logical" element
-                SwissQrCodePayload += iban.ToString() + br; //IBAN
+                swissQrCodePayload += iban + Br; //IBAN
 
 
                 //Cdtr "logical" element
-                SwissQrCodePayload += creditor.ToString();
+                swissQrCodePayload += creditor.ToString();
 
                 //UltmtCdtr "logical" element
                 //Since version 2.0 ultimate creditor was marked as "for future use" and has to be delivered empty in any case!
-                SwissQrCodePayload += string.Concat(Enumerable.Repeat(br, 7).ToArray());
+                swissQrCodePayload += string.Concat(Enumerable.Repeat(Br, 7).ToArray());
 
                 //CcyAmtDate "logical" element
                 //Amoutn has to use . as decimal seperator in any case. See https://www.paymentstandards.ch/dam/downloads/ig-qr-bill-en.pdf page 27.
-                SwissQrCodePayload += (amount != null ? $"{amount:0.00}".Replace(",", ".") : string.Empty) + br; //Amt
-                SwissQrCodePayload += currency + br; //Ccy                
+                swissQrCodePayload += (amount != null ? $"{amount:0.00}".Replace(",", ".") : string.Empty) + Br; //Amt
+                swissQrCodePayload += currency + Br; //Ccy                
                 //Removed in S-QR version 2.0
                 //SwissQrCodePayload += (requestedDateOfPayment != null ?  ((DateTime)requestedDateOfPayment).ToString("yyyy-MM-dd") : string.Empty) + br; //ReqdExctnDt
 
                 //UltmtDbtr "logical" element
                 if (debitor != null)
-                    SwissQrCodePayload += debitor.ToString();
+                    swissQrCodePayload += debitor.ToString();
                 else
-                    SwissQrCodePayload += string.Concat(Enumerable.Repeat(br, 7).ToArray());
+                    swissQrCodePayload += string.Concat(Enumerable.Repeat(Br, 7).ToArray());
 
 
                 //RmtInf "logical" element
-                SwissQrCodePayload += reference.RefType.ToString() + br; //Tp
-                SwissQrCodePayload += (!string.IsNullOrEmpty(reference.ReferenceText) ? reference.ReferenceText : string.Empty) + br; //Ref
+                swissQrCodePayload += reference.RefType + Br; //Tp
+                swissQrCodePayload += (!string.IsNullOrEmpty(reference.ReferenceText) ? reference.ReferenceText : string.Empty) + Br; //Ref
 
 
                 //AddInf "logical" element
-                SwissQrCodePayload += (!string.IsNullOrEmpty(additionalInformation.UnstructureMessage) ? additionalInformation.UnstructureMessage : string.Empty) + br; //Ustrd
-                SwissQrCodePayload += additionalInformation.Trailer + br; //Trailer
-                SwissQrCodePayload += (!string.IsNullOrEmpty(additionalInformation.BillInformation) ? additionalInformation.BillInformation : string.Empty) + br; //StrdBkgInf
+                swissQrCodePayload += (!string.IsNullOrEmpty(additionalInformation.UnstructuredMessage) ? additionalInformation.UnstructuredMessage : string.Empty) + Br; //Ustrd
+                swissQrCodePayload += additionalInformation.Trailer + Br; //Trailer
+                swissQrCodePayload += (!string.IsNullOrEmpty(additionalInformation.BillInformation) ? additionalInformation.BillInformation : string.Empty) + Br; //StrdBkgInf
 
                 //AltPmtInf "logical" element
                 if (!string.IsNullOrEmpty(alternativeProcedure1))
-                    SwissQrCodePayload += alternativeProcedure1.Replace("\n", "") + br; //AltPmt
+                    swissQrCodePayload += alternativeProcedure1.Replace("\n", "") + Br; //AltPmt
                 if (!string.IsNullOrEmpty(alternativeProcedure2))
-                    SwissQrCodePayload += alternativeProcedure2.Replace("\n", "") + br; //AltPmt
+                    swissQrCodePayload += alternativeProcedure2.Replace("\n", "") + Br; //AltPmt
 
                 //S-QR specification 2.0, chapter 4.2.3
-                if (SwissQrCodePayload.EndsWith(br))
-                    SwissQrCodePayload = SwissQrCodePayload.Remove(SwissQrCodePayload.Length - br.Length);
+                if (swissQrCodePayload.EndsWith(Br))
+                    swissQrCodePayload = swissQrCodePayload.Remove(swissQrCodePayload.Length - Br.Length);
 
-                return SwissQrCodePayload;
+                return swissQrCodePayload;
             }
-
-
-
-
+            
             /// <summary>
             /// ISO 4217 currency codes
             /// </summary>
@@ -1185,7 +1140,7 @@ namespace Steeltype.QRCoderLite
             //Keep in mind, that the ECC level has to be set to "M" when generating a Girocode!
             //Girocode specification: http://www.europeanpaymentscouncil.eu/index.cfm/knowledge-bank/epc-documents/quick-response-code-guidelines-to-enable-data-capture-for-the-initiation-of-a-sepa-credit-transfer/epc069-12-quick-response-code-guidelines-to-enable-data-capture-for-the-initiation-of-a-sepa-credit-transfer1/
 
-            private string br = "\n";
+            private const string Br = "\n";
             private readonly string iban, bic, name, purposeOfCreditTransfer, remittanceInformation, messageToGirocodeUser;
             private readonly decimal amount;
             private readonly GirocodeVersion version;
@@ -1242,21 +1197,21 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                var girocodePayload = "BCD" + br;
-                girocodePayload += ((version == GirocodeVersion.Version1) ? "001" : "002") + br;
-                girocodePayload += (int)encoding + 1 + br;
-                girocodePayload += "SCT" + br;
-                girocodePayload += bic + br;
-                girocodePayload += name + br;
-                girocodePayload += iban + br;
-                girocodePayload += $"EUR{amount:0.00}".Replace(",", ".") + br;
-                girocodePayload += purposeOfCreditTransfer + br;
+                var girocodePayload = "BCD" + Br;
+                girocodePayload += ((version == GirocodeVersion.Version1) ? "001" : "002") + Br;
+                girocodePayload += (int)encoding + 1 + Br;
+                girocodePayload += "SCT" + Br;
+                girocodePayload += bic + Br;
+                girocodePayload += name + Br;
+                girocodePayload += iban + Br;
+                girocodePayload += $"EUR{amount:0.00}".Replace(",", ".") + Br;
+                girocodePayload += purposeOfCreditTransfer + Br;
                 girocodePayload += ((typeOfRemittance == TypeOfRemittance.Structured)
                     ? remittanceInformation
-                    : string.Empty) + br;
+                    : string.Empty) + Br;
                 girocodePayload += ((typeOfRemittance == TypeOfRemittance.Unstructured)
                     ? remittanceInformation
-                    : string.Empty) + br;
+                    : string.Empty) + Br;
                 girocodePayload += messageToGirocodeUser;
 
                 return ConvertStringToEncoding(girocodePayload, encoding.ToString().Replace("_", "-"));
@@ -1375,9 +1330,6 @@ namespace Steeltype.QRCoderLite
             {
             }
 
-
-
-
             /// <summary>
             /// Generic constructor. Please use specific (non-SEPA or SEPA) constructor
             /// </summary>
@@ -1406,12 +1358,12 @@ namespace Steeltype.QRCoderLite
                 //Loaded via "contact-constructor"
                 if (internalMode == 1)
                 {
-                    if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
+                    if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
                         throw new BezahlCodeException("The constructor without an amount may only ne used with authority types 'contact' and 'contact_v2'.");
-                    if (authority == AuthorityType.contact && (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(bnc)))
+                    if (authority == AuthorityType.Contact && (string.IsNullOrEmpty(account) || string.IsNullOrEmpty(bnc)))
                         throw new BezahlCodeException("When using authority type 'contact' the parameters 'account' and 'bnc' must be set.");
 
-                    if (authority != AuthorityType.contact_v2)
+                    if (authority != AuthorityType.ContactV2)
                     {
                         var oldFilled = (!string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(bnc));
                         var newFilled = (!string.IsNullOrEmpty(iban) && !string.IsNullOrEmpty(bic));
@@ -1422,17 +1374,17 @@ namespace Steeltype.QRCoderLite
                 else if (internalMode == 2)
                 {
 #pragma warning disable CS0612
-                    if (authority != AuthorityType.periodicsinglepayment && authority != AuthorityType.singledirectdebit && authority != AuthorityType.singlepayment)
+                    if (authority != AuthorityType.Periodicsinglepayment && authority != AuthorityType.Singledirectdebit && authority != AuthorityType.Singlepayment)
                         throw new BezahlCodeException("The constructor with 'account' and 'bnc' may only be used with 'non SEPA' authority types. Either choose another authority type or switch constructor.");
-                    if (authority == AuthorityType.periodicsinglepayment && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
+                    if (authority == AuthorityType.Periodicsinglepayment && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
                         throw new BezahlCodeException("When using 'periodicsinglepayment' as authority type, the parameters 'periodicTimeunit' and 'periodicTimeunitRotation' must be set.");
 #pragma warning restore CS0612
                 }
                 else if (internalMode == 3)
                 {
-                    if (authority != AuthorityType.periodicsinglepaymentsepa && authority != AuthorityType.singledirectdebitsepa && authority != AuthorityType.singlepaymentsepa)
+                    if (authority != AuthorityType.Periodicsinglepaymentsepa && authority != AuthorityType.Singledirectdebitsepa && authority != AuthorityType.Singlepaymentsepa)
                         throw new BezahlCodeException("The constructor with 'iban' and 'bic' may only be used with 'SEPA' authority types. Either choose another authority type or switch constructor.");
-                    if (authority == AuthorityType.periodicsinglepaymentsepa && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
+                    if (authority == AuthorityType.Periodicsinglepaymentsepa && (string.IsNullOrEmpty(periodicTimeunit) || periodicTimeunitRotation == 0))
                         throw new BezahlCodeException("When using 'periodicsinglepaymentsepa' as authority type, the parameters 'periodicTimeunit' and 'periodicTimeunitRotation' must be set.");
                 }
 
@@ -1451,7 +1403,7 @@ namespace Steeltype.QRCoderLite
 
                 //Non-SEPA payment types
 #pragma warning disable CS0612
-                if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.singledirectdebit || authority == AuthorityType.singlepayment || authority == AuthorityType.contact || (authority == AuthorityType.contact_v2 && oldWayFilled))
+                if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Singledirectdebit || authority == AuthorityType.Singlepayment || authority == AuthorityType.Contact || (authority == AuthorityType.ContactV2 && oldWayFilled))
                 {
 #pragma warning restore CS0612
                     if (!Regex.IsMatch(account.Replace(" ", ""), @"^[0-9]{1,9}$"))
@@ -1461,7 +1413,7 @@ namespace Steeltype.QRCoderLite
                         throw new BezahlCodeException("The bnc entered isn't valid.");
                     this.bnc = bnc.Replace(" ", "").ToUpper();
 
-                    if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
+                    if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
                     {
                         if (postingKey < 0 || postingKey >= 100)
                             throw new BezahlCodeException("PostingKey must be within 0 and 99.");
@@ -1470,7 +1422,7 @@ namespace Steeltype.QRCoderLite
                 }
 
                 //SEPA payment types
-                if (authority == AuthorityType.periodicsinglepaymentsepa || authority == AuthorityType.singledirectdebitsepa || authority == AuthorityType.singlepaymentsepa || (authority == AuthorityType.contact_v2 && newWayFilled))
+                if (authority == AuthorityType.Periodicsinglepaymentsepa || authority == AuthorityType.Singledirectdebitsepa || authority == AuthorityType.Singlepaymentsepa || (authority == AuthorityType.ContactV2 && newWayFilled))
                 {
                     if (!IsValidIban(iban))
                         throw new BezahlCodeException("The IBAN entered isn't valid.");
@@ -1479,7 +1431,7 @@ namespace Steeltype.QRCoderLite
                         throw new BezahlCodeException("The BIC entered isn't valid.");
                     this.bic = bic.Replace(" ", "").ToUpper();
 
-                    if (authority != AuthorityType.contact_v2)
+                    if (authority != AuthorityType.ContactV2)
                     {
                         if (sepaReference.Length > 35)
                             throw new BezahlCodeException("SEPA reference texts have to be shorter than 36 chars.");
@@ -1497,7 +1449,7 @@ namespace Steeltype.QRCoderLite
                 }
 
                 //Checks for all payment types
-                if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
+                if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
                 {
                     if (amount.ToString().Replace(",", ".").Contains(".") && amount.ToString().Replace(",", ".").Split('.')[1].TrimEnd('0').Length > 2)
                         throw new BezahlCodeException("Amount must have less than 3 digits after decimal point.");
@@ -1516,7 +1468,7 @@ namespace Steeltype.QRCoderLite
                         this.executionDate = (DateTime)executionDate;
                     }
 #pragma warning disable CS0612
-                    if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.periodicsinglepaymentsepa)
+                    if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Periodicsinglepaymentsepa)
 #pragma warning restore CS0612
                     {
                         if (periodicTimeunit.ToUpper() != "M" && periodicTimeunit.ToUpper() != "W")
@@ -1543,11 +1495,11 @@ namespace Steeltype.QRCoderLite
 
                 bezahlCodePayload += $"name={Uri.EscapeDataString(name)}&";
 
-                if (authority != AuthorityType.contact && authority != AuthorityType.contact_v2)
+                if (authority != AuthorityType.Contact && authority != AuthorityType.ContactV2)
                 {
                     //Handle what is same for all payments
 #pragma warning disable CS0612
-                    if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.singledirectdebit || authority == AuthorityType.singlepayment)
+                    if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Singledirectdebit || authority == AuthorityType.Singlepayment)
 #pragma warning restore CS0612
                     {
                         bezahlCodePayload += $"account={account}&";
@@ -1563,7 +1515,7 @@ namespace Steeltype.QRCoderLite
                         if (!string.IsNullOrEmpty(sepaReference))
                             bezahlCodePayload += $"separeference={Uri.EscapeDataString(sepaReference)}&";
 
-                        if (authority == AuthorityType.singledirectdebitsepa)
+                        if (authority == AuthorityType.Singledirectdebitsepa)
                         {
                             if (!string.IsNullOrEmpty(creditorId))
                                 bezahlCodePayload += $"creditorid={Uri.EscapeDataString(creditorId)}&";
@@ -1580,7 +1532,7 @@ namespace Steeltype.QRCoderLite
                     bezahlCodePayload += $"currency={currency}&";
                     bezahlCodePayload += $"executiondate={executionDate.ToString("ddMMyyyy")}&";
 #pragma warning disable CS0612
-                    if (authority == AuthorityType.periodicsinglepayment || authority == AuthorityType.periodicsinglepaymentsepa)
+                    if (authority == AuthorityType.Periodicsinglepayment || authority == AuthorityType.Periodicsinglepaymentsepa)
                     {
                         bezahlCodePayload += $"periodictimeunit={periodicTimeunit}&";
                         bezahlCodePayload += $"periodictimeunitrotation={periodicTimeunitRotation}&";
@@ -1594,12 +1546,12 @@ namespace Steeltype.QRCoderLite
                 else
                 {
                     //Handle what is same for all contacts
-                    if (authority == AuthorityType.contact)
+                    if (authority == AuthorityType.Contact)
                     {
                         bezahlCodePayload += $"account={account}&";
                         bezahlCodePayload += $"bnc={bnc}&";
                     }
-                    else if (authority == AuthorityType.contact_v2)
+                    else if (authority == AuthorityType.ContactV2)
                     {
                         if (!string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(bnc))
                         {
@@ -1815,37 +1767,37 @@ namespace Steeltype.QRCoderLite
                 /// Single payment (Überweisung)
                 /// </summary>
                 [Obsolete]
-                singlepayment,
+                Singlepayment,
                 /// <summary>
                 /// Single SEPA payment (SEPA-Überweisung)
                 /// </summary>
-                singlepaymentsepa,
+                Singlepaymentsepa,
                 /// <summary>
                 /// Single debit (Lastschrift)
                 /// </summary>
                 [Obsolete]
-                singledirectdebit,
+                Singledirectdebit,
                 /// <summary>
                 /// Single SEPA debit (SEPA-Lastschrift)
                 /// </summary>
-                singledirectdebitsepa,
+                Singledirectdebitsepa,
                 /// <summary>
                 /// Periodic payment (Dauerauftrag)
                 /// </summary>
                 [Obsolete]
-                periodicsinglepayment,
+                Periodicsinglepayment,
                 /// <summary>
                 /// Periodic SEPA payment (SEPA-Dauerauftrag)
                 /// </summary>
-                periodicsinglepaymentsepa,
+                Periodicsinglepaymentsepa,
                 /// <summary>
                 /// Contact data
                 /// </summary>
-                contact,
+                Contact,
                 /// <summary>
                 /// Contact data V2
                 /// </summary>
-                contact_v2
+                ContactV2
             }
 
             public class BezahlCodeException : Exception
@@ -1887,7 +1839,7 @@ namespace Steeltype.QRCoderLite
                 this.description = description;
                 this.location = location;
                 this.encoding = encoding;
-                string dtFormat = allDayEvent ? "yyyyMMdd" : "yyyyMMddTHHmmss";
+                var dtFormat = allDayEvent ? "yyyyMMdd" : "yyyyMMddTHHmmss";
                 this.start = start.ToString(dtFormat);
                 this.end = end.ToString(dtFormat);
             }
@@ -1895,14 +1847,14 @@ namespace Steeltype.QRCoderLite
             public override string ToString()
             {
                 var vEvent = $"BEGIN:VEVENT{Environment.NewLine}";
-                vEvent += $"SUMMARY:{this.subject}{Environment.NewLine}";
-                vEvent += !string.IsNullOrEmpty(this.description) ? $"DESCRIPTION:{this.description}{Environment.NewLine}" : "";
-                vEvent += !string.IsNullOrEmpty(this.location) ? $"LOCATION:{this.location}{Environment.NewLine}" : "";
-                vEvent += $"DTSTART:{this.start}{Environment.NewLine}";
-                vEvent += $"DTEND:{this.end}{Environment.NewLine}";
+                vEvent += $"SUMMARY:{subject}{Environment.NewLine}";
+                vEvent += !string.IsNullOrEmpty(description) ? $"DESCRIPTION:{description}{Environment.NewLine}" : "";
+                vEvent += !string.IsNullOrEmpty(location) ? $"LOCATION:{location}{Environment.NewLine}" : "";
+                vEvent += $"DTSTART:{start}{Environment.NewLine}";
+                vEvent += $"DTEND:{end}{Environment.NewLine}";
                 vEvent += "END:VEVENT";
 
-                if (this.encoding == EventEncoding.iCalComplete)
+                if (encoding == EventEncoding.iCalComplete)
                     vEvent = $@"BEGIN:VCALENDAR{Environment.NewLine}VERSION:2.0{Environment.NewLine}{vEvent}{Environment.NewLine}END:VCALENDAR";
 
                 return vEvent;
@@ -1926,8 +1878,8 @@ namespace Steeltype.QRCoderLite
             [Obsolete("This property is obsolete, use " + nameof(AuthAlgorithm) + " instead", false)]
             public OoneTimePasswordAuthAlgorithm Algorithm
             {
-                get { return (OoneTimePasswordAuthAlgorithm)Enum.Parse(typeof(OoneTimePasswordAuthAlgorithm), AuthAlgorithm.ToString()); }
-                set { AuthAlgorithm = (OneTimePasswordAuthAlgorithm)Enum.Parse(typeof(OneTimePasswordAuthAlgorithm), value.ToString()); }
+                get => (OoneTimePasswordAuthAlgorithm)Enum.Parse(typeof(OoneTimePasswordAuthAlgorithm), AuthAlgorithm.ToString());
+                set => AuthAlgorithm = (OneTimePasswordAuthAlgorithm)Enum.Parse(typeof(OneTimePasswordAuthAlgorithm), value.ToString());
             }
 
             public string Issuer { get; set; }
@@ -1964,7 +1916,7 @@ namespace Steeltype.QRCoderLite
                     case OneTimePasswordAuthType.TOTP:
                         return TimeToString();
                     case OneTimePasswordAuthType.HOTP:
-                        return HMACToString();
+                        return HmacToString();
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -1972,7 +1924,7 @@ namespace Steeltype.QRCoderLite
 
             // Note: Issuer:Label must only contain 1 : if either of the Issuer or the Label has a : then it is invalid.
             // Defaults are 6 digits and 30 for Period
-            private string HMACToString()
+            private string HmacToString()
             {
                 var sb = new StringBuilder("otpauth://hotp/");
                 ProcessCommonFields(sb);
@@ -2006,7 +1958,7 @@ namespace Steeltype.QRCoderLite
                 {
                     throw new Exception("Secret must be a filled out base32 encoded string");
                 }
-                string strippedSecret = Secret.Replace(" ", "");
+                var strippedSecret = Secret.Replace(" ", "");
                 string escapedIssuer = null;
                 string label = null;
 
@@ -2057,7 +2009,7 @@ namespace Steeltype.QRCoderLite
             private readonly string hostname, password, tag, methodStr, parameter;
             private readonly Method method;
             private readonly int port;
-            private Dictionary<string, string> encryptionTexts = new Dictionary<string, string>() {
+            private readonly Dictionary<string, string> encryptionTexts = new() {
                 { "Chacha20IetfPoly1305", "chacha20-ietf-poly1305" },
                 { "Aes128Gcm", "aes-128-gcm" },
                 { "Aes192Gcm", "aes-192-gcm" },
@@ -2125,7 +2077,7 @@ namespace Steeltype.QRCoderLite
                 )
                 }, tag)
             { }
-            private Dictionary<string, string> UrlEncodeTable = new Dictionary<string, string>
+            private readonly Dictionary<string, string> urlEncodeTable = new()
             {
                 [" "] = "+",
                 ["\0"] = "%00",
@@ -2161,8 +2113,8 @@ namespace Steeltype.QRCoderLite
 
             private string UrlEncode(string i)
             {
-                string j = i;
-                foreach (var kv in UrlEncodeTable)
+                var j = i;
+                foreach (var kv in urlEncodeTable)
                 {
                     j = j.Replace(kv.Key, kv.Value);
                 }
@@ -2179,11 +2131,11 @@ namespace Steeltype.QRCoderLite
                 this.port = port;
                 this.password = password;
                 this.method = method;
-                this.methodStr = encryptionTexts[method.ToString()];
+                methodStr = encryptionTexts[method.ToString()];
                 this.tag = tag;
 
                 if (parameters != null)
-                    this.parameter =
+                    parameter =
                         string.Join("&",
                         parameters.Select(
                             kv => $"{UrlEncode(kv.Key)}={UrlEncode(kv.Value)}"
@@ -2283,7 +2235,7 @@ namespace Steeltype.QRCoderLite
             /// <param name="address">Receiver's monero address</param>
             /// <param name="txAmount">Amount to transfer</param>
             /// <param name="txPaymentId">Payment id</param>
-            /// <param name="recipientName">Receipient's name</param>
+            /// <param name="recipientName">Recipient's name</param>
             /// <param name="txDescription">Reference text / payment description</param>
             public MoneroTransaction(string address, float? txAmount = null, string txPaymentId = null, string recipientName = null, string txDescription = null)
             {
@@ -2332,23 +2284,23 @@ namespace Steeltype.QRCoderLite
             //Keep in mind, that the ECC level has to be set to "M", version to 15 and ECI to EciMode.Iso8859_2 when generating a SlovenianUpnQr!
             //SlovenianUpnQr specification: https://www.upn-qr.si/uploads/files/NavodilaZaProgramerjeUPNQR.pdf
 
-            private string _payerName = "";
-            private string _payerAddress = "";
-            private string _payerPlace = "";
-            private string _amount = "";
-            private string _code = "";
-            private string _purpose = "";
-            private string _deadLine = "";
-            private string _recipientIban = "";
-            private string _recipientName = "";
-            private string _recipientAddress = "";
-            private string _recipientPlace = "";
-            private string _recipientSiModel = "";
-            private string _recipientSiReference = "";
+            private readonly string payerName;
+            private readonly string payerAddress;
+            private readonly string payerPlace;
+            private readonly string amount;
+            private readonly string code;
+            private readonly string purpose;
+            private readonly string deadLine;
+            private readonly string recipientIban;
+            private readonly string recipientName;
+            private readonly string recipientAddress;
+            private readonly string recipientPlace;
+            private readonly string recipientSiModel;
+            private readonly string recipientSiReference;
 
-            public override int Version { get { return 15; } }
-            public override QRCodeGenerator.ECCLevel EccLevel { get { return QRCodeGenerator.ECCLevel.M; } }
-            public override QRCodeGenerator.EciMode EciMode { get { return QRCodeGenerator.EciMode.Iso8859_2; } }
+            public override int Version => 15;
+            public override QRCodeGenerator.ECCLevel EccLevel => QRCodeGenerator.ECCLevel.M;
+            public override QRCodeGenerator.EciMode EciMode => QRCodeGenerator.EciMode.Iso8859_2;
 
             private string LimitLength(string value, int maxLength)
             {
@@ -2361,69 +2313,67 @@ namespace Steeltype.QRCoderLite
 
             public SlovenianUpnQr(string payerName, string payerAddress, string payerPlace, string recipientName, string recipientAddress, string recipientPlace, string recipientIban, string description, double amount, DateTime? deadline, string recipientSiModel = "SI99", string recipientSiReference = "", string code = "OTHR")
             {
-                _payerName = LimitLength(payerName.Trim(), 33);
-                _payerAddress = LimitLength(payerAddress.Trim(), 33);
-                _payerPlace = LimitLength(payerPlace.Trim(), 33);
-                _amount = FormatAmount(amount);
-                _code = LimitLength(code.Trim().ToUpper(), 4);
-                _purpose = LimitLength(description.Trim(), 42);
-                _deadLine = (deadline == null) ? "" : deadline?.ToString("dd.MM.yyyy");
-                _recipientIban = LimitLength(recipientIban.Trim(), 34);
-                _recipientName = LimitLength(recipientName.Trim(), 33);
-                _recipientAddress = LimitLength(recipientAddress.Trim(), 33);
-                _recipientPlace = LimitLength(recipientPlace.Trim(), 33);
-                _recipientSiModel = LimitLength(recipientSiModel.Trim().ToUpper(), 4);
-                _recipientSiReference = LimitLength(recipientSiReference.Trim(), 22);
+                this.payerName = LimitLength(payerName.Trim(), 33);
+                this.payerAddress = LimitLength(payerAddress.Trim(), 33);
+                this.payerPlace = LimitLength(payerPlace.Trim(), 33);
+                this.amount = FormatAmount(amount);
+                this.code = LimitLength(code.Trim().ToUpper(), 4);
+                purpose = LimitLength(description.Trim(), 42);
+                deadLine = (deadline == null) ? "" : deadline?.ToString("dd.MM.yyyy");
+                this.recipientIban = LimitLength(recipientIban.Trim(), 34);
+                this.recipientName = LimitLength(recipientName.Trim(), 33);
+                this.recipientAddress = LimitLength(recipientAddress.Trim(), 33);
+                this.recipientPlace = LimitLength(recipientPlace.Trim(), 33);
+                this.recipientSiModel = LimitLength(recipientSiModel.Trim().ToUpper(), 4);
+                this.recipientSiReference = LimitLength(recipientSiReference.Trim(), 22);
             }
-
 
             private string FormatAmount(double amount)
             {
-                int _amt = (int)Math.Round(amount * 100.0);
-                return String.Format("{0:00000000000}", _amt);
+                var amt = (int)Math.Round(amount * 100.0);
+                return $"{amt:00000000000}";
             }
 
             private int CalculateChecksum()
             {
-                int _cs = 5 + _payerName.Length; //5 = UPNQR constant Length
-                _cs += _payerAddress.Length;
-                _cs += _payerPlace.Length;
-                _cs += _amount.Length;
-                _cs += _code.Length;
-                _cs += _purpose.Length;
-                _cs += _deadLine.Length;
-                _cs += _recipientIban.Length;
-                _cs += _recipientName.Length;
-                _cs += _recipientAddress.Length;
-                _cs += _recipientPlace.Length;
-                _cs += _recipientSiModel.Length;
-                _cs += _recipientSiReference.Length;
-                _cs += 19;
-                return _cs;
+                var cs = 5 + payerName.Length; //5 = UPNQR constant Length
+                cs += payerAddress.Length;
+                cs += payerPlace.Length;
+                cs += amount.Length;
+                cs += code.Length;
+                cs += purpose.Length;
+                cs += deadLine.Length;
+                cs += recipientIban.Length;
+                cs += recipientName.Length;
+                cs += recipientAddress.Length;
+                cs += recipientPlace.Length;
+                cs += recipientSiModel.Length;
+                cs += recipientSiReference.Length;
+                cs += 19;
+                return cs;
             }
 
             public override string ToString()
             {
-                var _sb = new StringBuilder();
-                _sb.Append("UPNQR");
-                _sb.Append('\n').Append('\n').Append('\n').Append('\n').Append('\n');
-                _sb.Append(_payerName).Append('\n');
-                _sb.Append(_payerAddress).Append('\n');
-                _sb.Append(_payerPlace).Append('\n');
-                _sb.Append(_amount).Append('\n').Append('\n').Append('\n');
-                _sb.Append(_code.ToUpper()).Append('\n');
-                _sb.Append(_purpose).Append('\n');
-                _sb.Append(_deadLine).Append('\n');
-                _sb.Append(_recipientIban.ToUpper()).Append('\n');
-                _sb.Append(_recipientSiModel).Append(_recipientSiReference).Append('\n');
-                _sb.Append(_recipientName).Append('\n');
-                _sb.Append(_recipientAddress).Append('\n');
-                _sb.Append(_recipientPlace).Append('\n');
-                _sb.AppendFormat("{0:000}", CalculateChecksum()).Append('\n');
-                return _sb.ToString();
+                var sb = new StringBuilder();
+                sb.Append("UPNQR");
+                sb.Append('\n').Append('\n').Append('\n').Append('\n').Append('\n');
+                sb.Append(payerName).Append('\n');
+                sb.Append(payerAddress).Append('\n');
+                sb.Append(payerPlace).Append('\n');
+                sb.Append(amount).Append('\n').Append('\n').Append('\n');
+                sb.Append(code.ToUpper()).Append('\n');
+                sb.Append(purpose).Append('\n');
+                sb.Append(deadLine).Append('\n');
+                sb.Append(recipientIban.ToUpper()).Append('\n');
+                sb.Append(recipientSiModel).Append(recipientSiReference).Append('\n');
+                sb.Append(recipientName).Append('\n');
+                sb.Append(recipientAddress).Append('\n');
+                sb.Append(recipientPlace).Append('\n');
+                sb.AppendFormat("{0:000}", CalculateChecksum()).Append('\n');
+                return sb.ToString();
             }
         }
-
 
         public class RussiaPaymentOrder : Payload
         {
@@ -2439,9 +2389,9 @@ namespace Steeltype.QRCoderLite
             // https://www.sbqr.ru/validator/index.html
 
             //base
-            private CharacterSets characterSet;
-            private MandatoryFields mFields;
-            private OptionalFields oFields;
+            private readonly CharacterSets characterSet;
+            private readonly MandatoryFields mFields;
+            private readonly OptionalFields oFields;
             private string separator = "|";
 
             private RussiaPaymentOrder()
@@ -2460,7 +2410,7 @@ namespace Steeltype.QRCoderLite
             /// <param name="correspAcc">Box number / account payee's bank (Номер кор./сч. банка получателя платежа)</param>
             /// <param name="optionalFields">An (optional) object of additional fields</param>
             /// <param name="characterSet">Type of encoding (default UTF-8)</param>
-            public RussiaPaymentOrder(string name, string personalAcc, string bankName, string BIC, string correspAcc, OptionalFields optionalFields = null, CharacterSets characterSet = CharacterSets.utf_8) : this()
+            public RussiaPaymentOrder(string name, string personalAcc, string bankName, string BIC, string correspAcc, OptionalFields optionalFields = null, CharacterSets characterSet = CharacterSets.Utf8) : this()
             {
                 this.characterSet = characterSet;
                 mFields.Name = ValidateInput(name, "Name", @"^.{1,160}$");
@@ -2483,14 +2433,8 @@ namespace Steeltype.QRCoderLite
                 var cp = characterSet.ToString().Replace("_", "-");
                 var bytes = ToBytes();
 
-#if !NET35_OR_GREATER && !NETSTANDARD1_3_OR_GREATER
-                System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-#endif
-#if NETSTANDARD1_3              
-                return Encoding.GetEncoding(cp).GetString(bytes,0,bytes.Length);
-#else
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 return Encoding.GetEncoding(cp).GetString(bytes);
-#endif
             }
 
             /// <summary>
@@ -2501,16 +2445,16 @@ namespace Steeltype.QRCoderLite
 
             public byte[] ToBytes()
             {
-                //Calculate the seperator
+                //Calculate the separator
                 separator = DetermineSeparator();
 
                 //Create the payload string
-                string ret = $"ST0001" + ((int)characterSet).ToString() + //(separator != "|" ? separator : "") + 
-                    $"{separator}Name={mFields.Name}" +
-                    $"{separator}PersonalAcc={mFields.PersonalAcc}" +
-                    $"{separator}BankName={mFields.BankName}" +
-                    $"{separator}BIC={mFields.BIC}" +
-                    $"{separator}CorrespAcc={mFields.CorrespAcc}";
+                var ret = $"ST0001" + ((int)characterSet) + //(separator != "|" ? separator : "") + 
+                          $"{separator}Name={mFields.Name}" +
+                          $"{separator}PersonalAcc={mFields.PersonalAcc}" +
+                          $"{separator}BankName={mFields.BankName}" +
+                          $"{separator}BIC={mFields.BIC}" +
+                          $"{separator}CorrespAcc={mFields.CorrespAcc}";
 
                 //Add optional fields, if filled
                 var optionalFieldsList = GetOptionalFieldsAsList();
@@ -2519,11 +2463,9 @@ namespace Steeltype.QRCoderLite
                 ret += separator;
 
                 //Encode return string as byte[] with correct CharacterSet
-#if !NET35_OR_GREATER
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-#endif
-                var cp = this.characterSet.ToString().Replace("_", "-");
-                byte[] bytesOut = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(cp), Encoding.UTF8.GetBytes(ret));
+                var cp = characterSet.ToString().Replace("_", "-");
+                var bytesOut = Encoding.Convert(Encoding.UTF8, Encoding.GetEncoding(cp), Encoding.UTF8.GetBytes(ret));
                 if (bytesOut.Length > 300)
                     throw new RussiaPaymentOrderException($"Data too long. Payload must not exceed 300 bytes, but actually is {bytesOut.Length} bytes long. Remove additional data fields or shorten strings/values.");
                 return bytesOut;
@@ -2552,7 +2494,7 @@ namespace Steeltype.QRCoderLite
             }
 
             /// <summary>
-            /// Takes all optional fields that are not null and returns their string represantion
+            /// Takes all optional fields that are not null and returns their string representation
             /// </summary>
             /// <returns>A List of strings</returns>
             private List<string> GetOptionalFieldsAsList()
@@ -2562,7 +2504,7 @@ namespace Steeltype.QRCoderLite
                         .Select(field =>
                         {
                             var objValue = field.GetValue(oFields, null);
-                            var value = field.PropertyType.Equals(typeof(DateTime?)) ? ((DateTime)objValue).ToString("dd.MM.yyyy") : objValue.ToString();
+                            var value = field.PropertyType == typeof(DateTime?) ? ((DateTime)objValue).ToString("dd.MM.yyyy") : objValue.ToString();
                             return $"{field.Name}={value}";
                         })
                         .ToList();
@@ -2570,7 +2512,7 @@ namespace Steeltype.QRCoderLite
 
 
             /// <summary>
-            /// Takes all mandatory fields that are not null and returns their string represantion
+            /// Takes all mandatory fields that are not null and returns their string representation
             /// </summary>
             /// <returns>A List of strings</returns>
             private List<string> GetMandatoryFieldsAsList()
@@ -2580,7 +2522,7 @@ namespace Steeltype.QRCoderLite
                         .Select(field =>
                         {
                             var objValue = field.GetValue(mFields);
-                            var value = field.FieldType.Equals(typeof(DateTime?)) ? ((DateTime)objValue).ToString("dd.MM.yyyy") : objValue.ToString();
+                            var value = field.FieldType == typeof(DateTime?) ? ((DateTime)objValue).ToString("dd.MM.yyyy") : objValue.ToString();
                             return $"{field.Name}={value}";
                         })
                         .ToList();
@@ -2590,31 +2532,31 @@ namespace Steeltype.QRCoderLite
             /// Validates a string against a given Regex pattern. Returns input if it matches the Regex expression (=valid) or throws Exception in case there's a mismatch
             /// </summary>
             /// <param name="input">String to be validated</param>
-            /// <param name="fieldname">Name/descriptor of the string to be validated</param>
+            /// <param name="fieldName">Name/descriptor of the string to be validated</param>
             /// <param name="pattern">A regex pattern to be used for validation</param>
             /// <param name="errorText">An optional error text. If null, a standard error text is generated</param>
             /// <returns>Input value (in case it is valid)</returns>
-            private static string ValidateInput(string input, string fieldname, string pattern, string errorText = null)
+            private static string ValidateInput(string input, string fieldName, string pattern, string errorText = null)
             {
-                return ValidateInput(input, fieldname, new string[] { pattern }, errorText);
+                return ValidateInput(input, fieldName, new string[] { pattern }, errorText);
             }
 
             /// <summary>
             /// Validates a string against one or more given Regex patterns. Returns input if it matches all regex expressions (=valid) or throws Exception in case there's a mismatch
             /// </summary>
             /// <param name="input">String to be validated</param>
-            /// <param name="fieldname">Name/descriptor of the string to be validated</param>
+            /// <param name="fieldName">Name/descriptor of the string to be validated</param>
             /// <param name="patterns">An array of regex patterns to be used for validation</param>
             /// <param name="errorText">An optional error text. If null, a standard error text is generated</param>
             /// <returns>Input value (in case it is valid)</returns>
-            private static string ValidateInput(string input, string fieldname, string[] patterns, string errorText = null)
+            private static string ValidateInput(string input, string fieldName, string[] patterns, string errorText = null)
             {
                 if (input == null)
-                    throw new RussiaPaymentOrderException($"The input for '{fieldname}' must not be null.");
+                    throw new RussiaPaymentOrderException($"The input for '{fieldName}' must not be null.");
                 foreach (var pattern in patterns)
                 {
                     if (!Regex.IsMatch(input, pattern))
-                        throw new RussiaPaymentOrderException(errorText ?? $"The input for '{fieldname}' ({input}) doesn't match the pattern {pattern}");
+                        throw new RussiaPaymentOrderException(errorText ?? $"The input for '{fieldName}' ({input}) doesn't match the pattern {pattern}");
                 }
                 return input;
             }
@@ -2630,125 +2572,125 @@ namespace Steeltype.QRCoderLite
 
             public class OptionalFields
             {
-                private string _sum;
+                private string sum;
                 /// <summary>
                 /// Payment amount, in kopecks (FTI’s Amount.)
                 /// <para>Сумма платежа, в копейках</para>
                 /// </summary>
                 public string Sum
                 {
-                    get { return _sum; }
-                    set { _sum = ValidateInput(value, "Sum", @"^\d{1,18}$"); }
+                    get => sum;
+                    set => sum = ValidateInput(value, "Sum", @"^\d{1,18}$");
                 }
 
-                private string _purpose;
+                private string purpose;
                 /// <summary>
                 /// Payment name (purpose)
                 /// <para>Наименование платежа (назначение)</para>
                 /// </summary>
                 public string Purpose
                 {
-                    get { return _purpose; }
-                    set { _purpose = ValidateInput(value, "Purpose", @"^.{1,160}$"); }
+                    get => purpose;
+                    set => purpose = ValidateInput(value, "Purpose", @"^.{1,160}$");
                 }
 
-                private string _payeeInn;
+                private string payeeInn;
                 /// <summary>
                 /// Payee's INN (Resident Tax Identification Number; Text, up to 12 characters.)
                 /// <para>ИНН получателя платежа</para>
                 /// </summary>
                 public string PayeeINN
                 {
-                    get { return _payeeInn; }
-                    set { _payeeInn = ValidateInput(value, "PayeeINN", @"^.{1,12}$"); }
+                    get => payeeInn;
+                    set => payeeInn = ValidateInput(value, "PayeeINN", @"^.{1,12}$");
                 }
 
-                private string _payerInn;
+                private string payerInn;
                 /// <summary>
                 /// Payer's INN (Resident Tax Identification Number; Text, up to 12 characters.)
                 /// <para>ИНН плательщика</para>
                 /// </summary>
                 public string PayerINN
                 {
-                    get { return _payerInn; }
-                    set { _payerInn = ValidateInput(value, "PayerINN", @"^.{1,12}$"); }
+                    get => payerInn;
+                    set => payerInn = ValidateInput(value, "PayerINN", @"^.{1,12}$");
                 }
 
-                private string _drawerStatus;
+                private string drawerStatus;
                 /// <summary>
                 /// Status compiler payment document
                 /// <para>Статус составителя платежного документа</para>
                 /// </summary>
                 public string DrawerStatus
                 {
-                    get { return _drawerStatus; }
-                    set { _drawerStatus = ValidateInput(value, "DrawerStatus", @"^.{1,2}$"); }
+                    get => drawerStatus;
+                    set => drawerStatus = ValidateInput(value, "DrawerStatus", @"^.{1,2}$");
                 }
 
-                private string _kpp;
+                private string kpp;
                 /// <summary>
                 /// KPP of the payee (Tax Registration Code; Text, up to 9 characters.)
                 /// <para>КПП получателя платежа</para>
                 /// </summary>
                 public string KPP
                 {
-                    get { return _kpp; }
-                    set { _kpp = ValidateInput(value, "KPP", @"^.{1,9}$"); }
+                    get => kpp;
+                    set => kpp = ValidateInput(value, "KPP", @"^.{1,9}$");
                 }
 
-                private string _cbc;
+                private string cbc;
                 /// <summary>
                 /// CBC
                 /// <para>КБК</para>
                 /// </summary>
                 public string CBC
                 {
-                    get { return _cbc; }
-                    set { _cbc = ValidateInput(value, "CBC", @"^.{1,20}$"); }
+                    get => cbc;
+                    set => cbc = ValidateInput(value, "CBC", @"^.{1,20}$");
                 }
 
-                private string _oktmo;
+                private string oktmo;
                 /// <summary>
                 /// All-Russian classifier territories of municipal formations
                 /// <para>Общероссийский классификатор территорий муниципальных образований</para>
                 /// </summary>
                 public string OKTMO
                 {
-                    get { return _oktmo; }
-                    set { _oktmo = ValidateInput(value, "OKTMO", @"^.{1,11}$"); }
+                    get => oktmo;
+                    set => oktmo = ValidateInput(value, "OKTMO", @"^.{1,11}$");
                 }
 
-                private string _paytReason;
+                private string paytReason;
                 /// <summary>
                 /// Basis of tax payment
                 /// <para>Основание налогового платежа</para>
                 /// </summary>
                 public string PaytReason
                 {
-                    get { return _paytReason; }
-                    set { _paytReason = ValidateInput(value, "PaytReason", @"^.{1,2}$"); }
+                    get => paytReason;
+                    set => paytReason = ValidateInput(value, "PaytReason", @"^.{1,2}$");
                 }
 
-                private string _taxPeriod;
+                private string taxPeriod;
                 /// <summary>
                 /// Taxable period
                 /// <para>Налоговый период</para>
                 /// </summary>
                 public string TaxPeriod
                 {
-                    get { return _taxPeriod; }
-                    set { _taxPeriod = ValidateInput(value, "ТaxPeriod", @"^.{1,10}$"); }
+                    get => taxPeriod;
+                    set => taxPeriod = ValidateInput(value, "ТaxPeriod", @"^.{1,10}$");
                 }
 
-                private string _docNo;
+                private string docNo;
                 /// <summary>
                 /// Document number
                 /// <para>Номер документа</para>
                 /// </summary>
                 public string DocNo
                 {
-                    get { return _docNo; }
-                    set { _docNo = ValidateInput(value, "DocNo", @"^.{1,15}$"); }
+                    get => docNo;
+                    set => docNo = ValidateInput(value, "DocNo", @"^.{1,15}$");
                 }
 
                 /// <summary>
@@ -2757,19 +2699,19 @@ namespace Steeltype.QRCoderLite
                 /// </summary>
                 public DateTime? DocDate { get; set; }
 
-                private string _taxPaytKind;
+                private string taxPaytKind;
                 /// <summary>
                 /// Payment type
                 /// <para>Тип платежа</para>
                 /// </summary>
                 public string TaxPaytKind
                 {
-                    get { return _taxPaytKind; }
-                    set { _taxPaytKind = ValidateInput(value, "TaxPaytKind", @"^.{1,2}$"); }
+                    get => taxPaytKind;
+                    set => taxPaytKind = ValidateInput(value, "TaxPaytKind", @"^.{1,2}$");
                 }
 
                 /**************************************************************************
-                 * The following fiels are no further specified in the standard
+                 * The following fields are no further specified in the standard
                  * document (https://sbqr.ru/standard/files/standart.pdf) thus there
                  * is no addition input validation implemented.
                  * **************************************************************************/
@@ -2973,29 +2915,28 @@ namespace Steeltype.QRCoderLite
             /// </summary>
             public enum TechCode
             {
-                Мобильная_связь_стационарный_телефон = 01,
-                Коммунальные_услуги_ЖКХAFN = 02,
-                ГИБДД_налоги_пошлины_бюджетные_платежи = 03,
-                Охранные_услуги = 04,
-                Услуги_оказываемые_УФМС = 05,
-                ПФР = 06,
-                Погашение_кредитов = 07,
-                Образовательные_учреждения = 08,
-                Интернет_и_ТВ = 09,
-                Электронные_деньги = 10,
-                Отдых_и_путешествия = 11,
-                Инвестиции_и_страхование = 12,
-                Спорт_и_здоровье = 13,
-                Благотворительные_и_общественные_организации = 14,
-                Прочие_услуги = 15
+                Мобильная_связь_стационарный_телефон = 01, // Mobile communication / landline phone
+                Коммунальные_услуги_ЖКХAFN = 02, // Utility services / Housing and communal services
+                ГИБДД_налоги_пошлины_бюджетные_платежи = 03, // Traffic police / taxes / duties / budget payments
+                Охранные_услуги = 04, // Security services
+                Услуги_оказываемые_УФМС = 05, // Services provided by the Federal Migration Service
+                ПФР = 06, // Pension Fund of Russia
+                Погашение_кредитов = 07, // Loan repayment
+                Образовательные_учреждения = 08, // Educational institutions
+                Интернет_и_ТВ = 09, // Internet and TV
+                Электронные_деньги = 10, // Electronic money
+                Отдых_и_путешествия = 11, // Recreation and travel
+                Инвестиции_и_страхование = 12, // Investments and insurance
+                Спорт_и_здоровье = 13, // Sports and health
+                Благотворительные_и_общественные_организации = 14, // Charitable and community organizations
+                Прочие_услуги = 15 // Other services
             }
 
             public enum CharacterSets
             {
-                windows_1251 = 1,       // Encoding.GetEncoding("windows-1251")
-                utf_8 = 2,              // Encoding.UTF8                          
-                koi8_r = 3              // Encoding.GetEncoding("koi8-r")
-
+                Windows1251 = 1,       // Encoding.GetEncoding("windows-1251")
+                Utf8 = 2,              // Encoding.UTF8                          
+                Koi8R = 3              // Encoding.GetEncoding("koi8-r")
             }
 
             public class RussiaPaymentOrderException : Exception
@@ -3008,42 +2949,65 @@ namespace Steeltype.QRCoderLite
 
         }
 
-
         private static bool IsValidIban(string iban)
         {
-            //Clean IBAN
+            // Remove spaces and dashes to clean up the IBAN for processing.
             var ibanCleared = iban.ToUpper().Replace(" ", "").Replace("-", "");
 
-            //Check for general structure
-            var structurallyValid = Regex.IsMatch(ibanCleared, @"^[a-zA-Z]{2}[0-9]{2}([a-zA-Z0-9]?){16,30}$");
+            // Validate the structure: country code (2 letters), checksum (2 digits), and the basic bank account number (BBAN) up to 30 alphanumeric characters.
+            var structurallyValid = Regex.IsMatch(ibanCleared, @"^[A-Z]{2}\d{2}[A-Z0-9]{16,30}$");
 
-            //Check IBAN checksum
-            var checksumValid = false;
-            var sum = $"{ibanCleared.Substring(4)}{ibanCleared.Substring(0, 4)}".ToCharArray().Aggregate("", (current, c) => current + (char.IsLetter(c) ? (c - 55).ToString() : c.ToString()));
-            int m = 0;
-            for (int i = 0; i < (int)Math.Ceiling((sum.Length - 2) / 7d); i++)
+            if (!structurallyValid)
             {
-                var offset = (i == 0 ? 0 : 2);
-                var start = i * 7 + offset;
-                var n = (i == 0 ? "" : m.ToString()) + sum.Substring(start, Math.Min(9 - offset, sum.Length - start));
-                if (!int.TryParse(n, NumberStyles.Any, CultureInfo.InvariantCulture, out m))
-                    break;
-                m = m % 97;
+                // If the IBAN doesn't follow the basic structure, it's invalid.
+                return false;
             }
-            checksumValid = m == 1;
-            return structurallyValid && checksumValid;
+
+            // Rearrange the IBAN for checksum calculation: move the first 4 characters to the end.
+            var rearrangedIban = $"{ibanCleared.Substring(4)}{ibanCleared.Substring(0, 4)}";
+
+            // Convert letters to numbers (A=10, B=11, ..., Z=35) and concatenate.
+            var numericIban = rearrangedIban.Select(c => char.IsLetter(c) ? (c - 55).ToString() : c.ToString())
+                .Aggregate(string.Empty, (current, next) => current + next);
+
+            // Calculate the checksum using modulo 97.
+            var checksumValid = CalculateIbanChecksum(numericIban) == 1;
+
+            // The IBAN is valid if both the structure and checksum are correct.
+            return checksumValid;
         }
 
-        private static bool IsValidQRIban(string iban)
+        private static int CalculateIbanChecksum(string numericIban)
+        {
+            var remainder = 0;
+            var position = 0;
+
+            // Process the numeric IBAN in chunks to avoid overflow issues.
+            while (position < numericIban.Length)
+            {
+                var length = Math.Min(numericIban.Length - position, 9); // Take chunks of up to 9 digits to fit in an int.
+                var number = int.Parse(remainder + numericIban.Substring(position, length), CultureInfo.InvariantCulture);
+                remainder = number % 97; // Modulo 97 operation.
+                position += length;
+            }
+
+            return remainder;
+        }
+
+        private static bool IsValidQrIban(string iban)
         {
             var foundQrIid = false;
             try
             {
                 var ibanCleared = iban.ToUpper().Replace(" ", "").Replace("-", "");
                 var possibleQrIid = Convert.ToInt32(ibanCleared.Substring(4, 5));
-                foundQrIid = possibleQrIid >= 30000 && possibleQrIid <= 31999;
+                foundQrIid = possibleQrIid is >= 30000 and <= 31999;
             }
-            catch { }
+            catch
+            {
+                // ignored
+            }
+
             return IsValidIban(iban) && foundQrIid;
         }
 
@@ -3052,13 +3016,12 @@ namespace Steeltype.QRCoderLite
             return Regex.IsMatch(bic.Replace(" ", ""), @"^([a-zA-Z]{4}[a-zA-Z]{2}[a-zA-Z0-9]{2}([a-zA-Z0-9]{3})?)$");
         }
 
-
         private static string ConvertStringToEncoding(string message, string encoding)
         {
-            Encoding iso = Encoding.GetEncoding(encoding);
-            Encoding utf8 = Encoding.UTF8;
-            byte[] utfBytes = utf8.GetBytes(message);
-            byte[] isoBytes = Encoding.Convert(utf8, iso, utfBytes);
+            var iso = Encoding.GetEncoding(encoding);
+            var utf8 = Encoding.UTF8;
+            var utfBytes = utf8.GetBytes(message);
+            var isoBytes = Encoding.Convert(utf8, iso, utfBytes);
             return iso.GetString(isoBytes, 0, isoBytes.Length);
         }
 
@@ -3075,28 +3038,37 @@ namespace Steeltype.QRCoderLite
             }
             return inp;
         }
-
-
-
+        
         public static bool ChecksumMod10(string digits)
         {
+            // Validate input is not null, empty, and has sufficient length.
             if (string.IsNullOrEmpty(digits) || digits.Length < 2)
                 return false;
-            int[] mods = new int[] { 0, 9, 4, 6, 8, 2, 7, 1, 3, 5 };
 
-            int remainder = 0;
-            for (int i = 0; i < digits.Length - 1; i++)
+            // Modulus 10 weightings
+            var mods = new[] { 0, 9, 4, 6, 8, 2, 7, 1, 3, 5 };
+
+            var remainder = 0;
+            // Iterate through all digits except the last one.
+            for (var i = 0; i < digits.Length - 1; i++)
             {
-                var num = Convert.ToInt32(digits[i]) - 48;
+                // Convert char digit to int (ASCII to numeric value).
+                var num = digits[i] - '0'; // More readable than using 48 (ASCII code for '0')
+                // Calculate the remainder using the modulus 10 table.
                 remainder = mods[(num + remainder) % 10];
             }
+    
+            // Calculate the final checksum digit.
             var checksum = (10 - remainder) % 10;
-            return checksum == Convert.ToInt32(digits[digits.Length - 1]) - 48;
+            // Compare the calculated checksum to the last digit of the input.
+            return digits.Length >= 1 && checksum == digits[^1] - '0';
         }
 
-        private static bool isHexStyle(string inp)
+        private static bool IsHexStyle(string inp)
         {
-            return (System.Text.RegularExpressions.Regex.IsMatch(inp, @"\A\b[0-9a-fA-F]+\b\Z") || System.Text.RegularExpressions.Regex.IsMatch(inp, @"\A\b(0[xX])?[0-9a-fA-F]+\b\Z"));
+            // Use a single regex to check for a valid hexadecimal string.
+            // The pattern checks for an optional "0x" or "0X" prefix followed by one or more hexadecimal digits.
+            return Regex.IsMatch(inp, @"\A(0[xX])?[0-9a-fA-F]+\Z");
         }
     }
 }
