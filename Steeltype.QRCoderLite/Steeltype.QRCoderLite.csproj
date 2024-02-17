@@ -2,7 +2,22 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>Steeltype.QRCoderLite</Title>
+		<Description>A derivative of QRCoder targeting .Net8 that uses Mono's SkiaSharp instead of System.Drawing, and with some minor adjustments for increased transparency and readability.</Description>
+		<Copyright>Copyright 2024 Steeltype LLC, released under BSD-3-Clause</Copyright>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/Steeltype/QRCoderLite</RepositoryUrl>
+		<PackageTags>C#, csharp, qr, qrcoder, qrcoderlite, net8, qrcode, qr-generator, skiasharp, qr-code-generator</PackageTags>
+		<PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Include="..\readme.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="SkiaSharp" Version="2.88.7" />
 	  <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.7" />
