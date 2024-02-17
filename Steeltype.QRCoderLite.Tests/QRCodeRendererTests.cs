@@ -1,4 +1,5 @@
-﻿using Shouldly;
+﻿using System.ComponentModel;
+using Shouldly;
 using SkiaSharp;
 using Steeltype.QRCoderLite.Tests.Helpers;
 using Xunit;

@@ -1,4 +1,5 @@
-﻿using Shouldly;
+﻿using System.ComponentModel;
+using Shouldly;
 using Steeltype.QRCoderLite.Tests.Helpers;
 using System.Globalization;
 using System.Reflection;

@@ -1,6 +1,7 @@
 ﻿using Shouldly;
 using Steeltype.QRCoderLite.Tests.Helpers;
 using System.Collections;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 using Xunit;
