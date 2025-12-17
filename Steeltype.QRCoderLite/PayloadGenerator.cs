@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Steeltype.QRCoderLite
@@ -569,6 +571,202 @@ namespace Steeltype.QRCoderLite
                 iCalComplete,
                 Universal
             }
+        }
+
+        /// <summary>
+        /// Generates a payload for One Time Password (OTP) used in 2FA apps like Google Authenticator.
+        /// </summary>
+        public class OneTimePassword : Payload
+        {
+            /// <summary>The type of OTP (TOTP or HOTP).</summary>
+            public OneTimePasswordAuthType Type { get; set; } = OneTimePasswordAuthType.TOTP;
+
+            /// <summary>The secret key (base32 encoded) used for OTP generation.</summary>
+            public string Secret { get; set; }
+
+            /// <summary>The hashing algorithm (SHA1, SHA256, SHA512).</summary>
+            public OneTimePasswordAuthAlgorithm AuthAlgorithm { get; set; } = OneTimePasswordAuthAlgorithm.SHA1;
+
+            /// <summary>The issuer (usually the service or company name).</summary>
+            public string Issuer { get; set; }
+
+            /// <summary>The label (usually the user's email or username).</summary>
+            public string Label { get; set; }
+
+            /// <summary>The number of digits in the OTP (default is 6).</summary>
+            public int Digits { get; set; } = 6;
+
+            /// <summary>The counter value for HOTP (only used if Type is HOTP).</summary>
+            public int? Counter { get; set; }
+
+            /// <summary>The period in seconds for TOTP (default is 30).</summary>
+            public int? Period { get; set; } = 30;
+
+            public override string ToString()
+            {
+                return Type switch
+                {
+                    OneTimePasswordAuthType.TOTP => BuildTotpString(),
+                    OneTimePasswordAuthType.HOTP => BuildHotpString(),
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
+
+            private string BuildTotpString()
+            {
+                if (Period == null)
+                    throw new InvalidOperationException("Period must be set for TOTP");
+
+                var sb = new StringBuilder("otpauth://totp/");
+                BuildCommonFields(sb);
+
+                if (Period != 30)
+                    sb.Append("&period=" + Period);
+
+                return sb.ToString();
+            }
+
+            private string BuildHotpString()
+            {
+                var sb = new StringBuilder("otpauth://hotp/");
+                BuildCommonFields(sb);
+                sb.Append("&counter=" + (Counter ?? 1));
+                return sb.ToString();
+            }
+
+            private void BuildCommonFields(StringBuilder sb)
+            {
+                if (string.IsNullOrWhiteSpace(Secret))
+                    throw new InvalidOperationException("Secret must be a filled out base32 encoded string");
+
+                var strippedSecret = Secret.Replace(" ", "");
+                string escapedIssuer = null;
+                string escapedLabel = null;
+
+                if (!string.IsNullOrWhiteSpace(Issuer))
+                {
+                    if (Issuer.Contains(':'))
+                        throw new InvalidOperationException("Issuer must not contain ':'");
+                    escapedIssuer = Uri.EscapeDataString(Issuer);
+                }
+
+                if (!string.IsNullOrWhiteSpace(Label))
+                {
+                    if (Label.Contains(':'))
+                        throw new InvalidOperationException("Label must not contain ':'");
+                    escapedLabel = Uri.EscapeDataString(Label);
+                }
+
+                if (escapedLabel != null && escapedIssuer != null)
+                    sb.Append(escapedIssuer + ":" + escapedLabel);
+                else if (escapedIssuer != null)
+                    sb.Append(escapedIssuer);
+
+                sb.Append("?secret=" + strippedSecret);
+
+                if (escapedIssuer != null)
+                    sb.Append("&issuer=" + escapedIssuer);
+
+                if (AuthAlgorithm != OneTimePasswordAuthAlgorithm.SHA1)
+                    sb.Append("&algorithm=" + AuthAlgorithm);
+
+                if (Digits != 6)
+                    sb.Append("&digits=" + Digits);
+            }
+
+            public enum OneTimePasswordAuthType
+            {
+                /// <summary>Time-based One-Time Password</summary>
+                TOTP,
+                /// <summary>HMAC-based One-Time Password</summary>
+                HOTP
+            }
+
+            public enum OneTimePasswordAuthAlgorithm
+            {
+                SHA1,
+                SHA256,
+                SHA512
+            }
+        }
+
+        /// <summary>
+        /// Generates a payload for Bitcoin-like cryptocurrency payment addresses.
+        /// </summary>
+        public class BitcoinLikeCryptoCurrencyAddress : Payload
+        {
+            private readonly BitcoinLikeCryptoCurrencyType _currencyType;
+            private readonly string _address;
+            private readonly string _label, _message;
+            private readonly double? _amount;
+
+            /// <summary>
+            /// Generates a Bitcoin-like cryptocurrency payment payload.
+            /// </summary>
+            /// <param name="currencyType">Type of cryptocurrency (Bitcoin, BitcoinCash, Litecoin).</param>
+            /// <param name="address">The cryptocurrency address of the payment receiver.</param>
+            /// <param name="amount">The amount of coins to transfer.</param>
+            /// <param name="label">A reference label.</param>
+            /// <param name="message">A reference text or message.</param>
+            public BitcoinLikeCryptoCurrencyAddress(BitcoinLikeCryptoCurrencyType currencyType, string address, double? amount = null, string label = null, string message = null)
+            {
+                _currencyType = currencyType;
+                _address = address;
+                _amount = amount;
+                _label = string.IsNullOrEmpty(label) ? null : Uri.EscapeDataString(label);
+                _message = string.IsNullOrEmpty(message) ? null : Uri.EscapeDataString(message);
+            }
+
+            public override string ToString()
+            {
+                var queryParts = new List<string>();
+
+                if (_label != null)
+                    queryParts.Add("label=" + _label);
+                if (_message != null)
+                    queryParts.Add("message=" + _message);
+                if (_amount.HasValue)
+                    queryParts.Add("amount=" + _amount.Value.ToString("#.########", CultureInfo.InvariantCulture));
+
+                var query = queryParts.Count > 0 ? "?" + string.Join("&", queryParts) : "";
+                var scheme = _currencyType.ToString().ToLowerInvariant();
+
+                return $"{scheme}:{_address}{query}";
+            }
+
+            public enum BitcoinLikeCryptoCurrencyType
+            {
+                Bitcoin,
+                BitcoinCash,
+                Litecoin
+            }
+        }
+
+        /// <summary>
+        /// Generates a Bitcoin payment address payload.
+        /// </summary>
+        public class BitcoinAddress : BitcoinLikeCryptoCurrencyAddress
+        {
+            public BitcoinAddress(string address, double? amount = null, string label = null, string message = null)
+                : base(BitcoinLikeCryptoCurrencyType.Bitcoin, address, amount, label, message) { }
+        }
+
+        /// <summary>
+        /// Generates a Bitcoin Cash payment address payload.
+        /// </summary>
+        public class BitcoinCashAddress : BitcoinLikeCryptoCurrencyAddress
+        {
+            public BitcoinCashAddress(string address, double? amount = null, string label = null, string message = null)
+                : base(BitcoinLikeCryptoCurrencyType.BitcoinCash, address, amount, label, message) { }
+        }
+
+        /// <summary>
+        /// Generates a Litecoin payment address payload.
+        /// </summary>
+        public class LitecoinAddress : BitcoinLikeCryptoCurrencyAddress
+        {
+            public LitecoinAddress(string address, double? amount = null, string label = null, string message = null)
+                : base(BitcoinLikeCryptoCurrencyType.Litecoin, address, amount, label, message) { }
         }
 
         private static string EscapeInput(string inp, bool simple = false)
