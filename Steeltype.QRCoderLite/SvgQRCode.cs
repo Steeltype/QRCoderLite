@@ -9,9 +9,27 @@ namespace Steeltype.QRCoderLite
     /// </summary>
     public sealed class SvgQRCode : AbstractQRCode, IDisposable
     {
+        /// <summary>
+        /// Maximum pixels per module for SVG output.
+        /// </summary>
+        private const int MaxPixelsPerModule = 1000;
+
+        /// <summary>
+        /// Maximum logo size in bytes (5 MB).
+        /// </summary>
+        private const int MaxLogoSizeBytes = 5 * 1024 * 1024;
+
         public SvgQRCode() { }
 
         public SvgQRCode(QRCodeData data) : base(data) { }
+
+        private static void ValidatePixelsPerModule(int pixelsPerModule)
+        {
+            if (pixelsPerModule < 1)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), "Pixels per module must be at least 1.");
+            if (pixelsPerModule > MaxPixelsPerModule)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), $"Pixels per module cannot exceed {MaxPixelsPerModule}.");
+        }
 
         /// <summary>
         /// Returns a scalable black and white QR code as an SVG string.
@@ -29,6 +47,7 @@ namespace Steeltype.QRCoderLite
         /// <param name="sizingMode">How to specify the SVG size.</param>
         public string GetGraphic(int pixelsPerModule, string darkColorHex, string lightColorHex, bool drawQuietZones = true, SizingMode sizingMode = SizingMode.WidthHeightAttribute)
         {
+            ValidatePixelsPerModule(pixelsPerModule);
             int offset = drawQuietZones ? 0 : 4;
             int moduleCount = QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : offset * 2);
             int size = moduleCount * pixelsPerModule;
@@ -83,6 +102,15 @@ namespace Steeltype.QRCoderLite
         /// <param name="logoMimeType">MIME type of the logo (default "image/png").</param>
         public string GetGraphic(int pixelsPerModule, string darkColorHex, string lightColorHex, byte[] logoBytes, int logoSizePercent = 15, bool drawQuietZones = true, string logoMimeType = "image/png")
         {
+            ValidatePixelsPerModule(pixelsPerModule);
+
+            if (logoBytes == null || logoBytes.Length == 0)
+                throw new ArgumentException("Logo bytes cannot be null or empty.", nameof(logoBytes));
+            if (logoBytes.Length > MaxLogoSizeBytes)
+                throw new ArgumentException($"Logo size exceeds maximum allowed size of {MaxLogoSizeBytes / (1024 * 1024)} MB.", nameof(logoBytes));
+            if (logoSizePercent < 1 || logoSizePercent > 50)
+                throw new ArgumentOutOfRangeException(nameof(logoSizePercent), "Logo size percent must be between 1 and 50.");
+
             int offset = drawQuietZones ? 0 : 4;
             int moduleCount = QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : offset * 2);
             int size = moduleCount * pixelsPerModule;

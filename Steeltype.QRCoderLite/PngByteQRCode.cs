@@ -5,6 +5,11 @@ namespace Steeltype.QRCoderLite
 {
     public sealed class PngByteQRCode : AbstractQRCode, IDisposable
     {
+        /// <summary>
+        /// Maximum pixels per module to prevent memory exhaustion.
+        /// </summary>
+        private const int MaxPixelsPerModule = 100;
+
         public PngByteQRCode()
         {
         }
@@ -13,11 +18,20 @@ namespace Steeltype.QRCoderLite
         {
         }
 
+        private static void ValidatePixelsPerModule(int pixelsPerModule)
+        {
+            if (pixelsPerModule < 1)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), "Pixels per module must be at least 1.");
+            if (pixelsPerModule > MaxPixelsPerModule)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), $"Pixels per module cannot exceed {MaxPixelsPerModule}.");
+        }
+
         /// <summary>
         /// Creates a black & white PNG of the QR code, using 1-bit grayscale.
         /// </summary>
         public byte[] GetGraphic(int pixelsPerModule, bool drawQuietZones = true)
         {
+            ValidatePixelsPerModule(pixelsPerModule);
             using var png = new PngBuilder();
             var size = (QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
             png.WriteHeader(size, size, 1, PngBuilder.ColorType.Greyscale);
@@ -31,6 +45,7 @@ namespace Steeltype.QRCoderLite
         /// </summary>
         public byte[] GetGraphic(int pixelsPerModule, byte[] darkColorRgba, byte[] lightColorRgba, bool drawQuietZones = true)
         {
+            ValidatePixelsPerModule(pixelsPerModule);
             using var png = new PngBuilder();
             var size = (QrCodeData.ModuleMatrix.Count - (drawQuietZones ? 0 : 8)) * pixelsPerModule;
             png.WriteHeader(size, size, 1, PngBuilder.ColorType.Indexed);

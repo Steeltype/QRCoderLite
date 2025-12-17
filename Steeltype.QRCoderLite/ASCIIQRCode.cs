@@ -36,6 +36,9 @@ namespace Steeltype.QRCoderLite
         /// <returns></returns>
         public string[] GetLineByLineGraphic(int repeatPerModule, string darkColorString = "██", string whiteSpaceString = "  ", bool drawQuietZones = true)
         {
+            if (repeatPerModule < 1 || repeatPerModule > 100)
+                throw new ArgumentOutOfRangeException(nameof(repeatPerModule), "Repeat per module must be between 1 and 100.");
+
             var qrCode = new List<string>();
             //We need to adjust the repeatPerModule based on number of characters in darkColorString
             //(we assume whiteSpaceString has the same number of characters)

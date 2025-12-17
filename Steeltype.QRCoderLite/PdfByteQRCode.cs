@@ -12,9 +12,22 @@ namespace Steeltype.QRCoderLite
         // Binary comment to ensure PDF is treated as binary (prevents text mode corruption)
         private static readonly byte[] PdfBinaryComment = { 0x25, 0xe2, 0xe3, 0xcf, 0xd3 };
 
+        /// <summary>
+        /// Maximum pixels per module for PDF output.
+        /// </summary>
+        private const int MaxPixelsPerModule = 1000;
+
         public PdfByteQRCode() { }
 
         public PdfByteQRCode(QRCodeData data) : base(data) { }
+
+        private static void ValidatePixelsPerModule(int pixelsPerModule)
+        {
+            if (pixelsPerModule < 1)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), "Pixels per module must be at least 1.");
+            if (pixelsPerModule > MaxPixelsPerModule)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), $"Pixels per module cannot exceed {MaxPixelsPerModule}.");
+        }
 
         /// <summary>
         /// Creates a PDF document with a black and white QR code.
@@ -31,6 +44,10 @@ namespace Steeltype.QRCoderLite
         /// <param name="dpi">DPI for the PDF (default 150).</param>
         public byte[] GetGraphic(int pixelsPerModule, string darkColorHex, string lightColorHex, int dpi = 150)
         {
+            ValidatePixelsPerModule(pixelsPerModule);
+            if (dpi < 1 || dpi > 2400)
+                throw new ArgumentOutOfRangeException(nameof(dpi), "DPI must be between 1 and 2400.");
+
             var moduleCount = QrCodeData.ModuleMatrix.Count;
             var imgSize = moduleCount * pixelsPerModule;
             var pdfMediaSize = FloatToStr(imgSize * 72f / dpi);

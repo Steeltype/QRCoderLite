@@ -16,18 +16,33 @@ namespace Steeltype.QRCoderLite
                 ModuleMatrix.Add(new BitArray(size));
         }
 
+        /// <summary>
+        /// Maximum decompressed size to prevent decompression bomb attacks (10 MB).
+        /// </summary>
+        private const int MaxDecompressedSize = 10 * 1024 * 1024;
+
+        /// <summary>
+        /// Maximum QR code version (40) has 177x177 modules.
+        /// </summary>
+        private const int MaxSideLength = 177 + 8; // Version 40 + quiet zone
+
         public QRCodeData(byte[] rawData, Compression compressMode)
         {
+            ArgumentNullException.ThrowIfNull(rawData);
+
+            if (rawData.Length < 5)
+                throw new ArgumentException("Raw data too short to contain valid QR code data.", nameof(rawData));
+
             var bytes = new List<byte>(rawData);
 
-            //Decompress
+            //Decompress with size limit to prevent decompression bombs
             if (compressMode == Compression.Deflate)
             {
                 using var input = new MemoryStream(bytes.ToArray());
                 using var output = new MemoryStream();
                 using (var decompressedStream = new DeflateStream(input, CompressionMode.Decompress))
                 {
-                    decompressedStream.CopyTo(output);
+                    CopyToWithLimit(decompressedStream, output, MaxDecompressedSize);
                 }
                 bytes = new List<byte>(output.ToArray());
             }
@@ -37,24 +52,35 @@ namespace Steeltype.QRCoderLite
                 using var output = new MemoryStream();
                 using (var decompressedStream = new GZipStream(input, CompressionMode.Decompress))
                 {
-                    decompressedStream.CopyTo(output);
+                    CopyToWithLimit(decompressedStream, output, MaxDecompressedSize);
                 }
                 bytes = new List<byte>(output.ToArray());
             }
 
-            if (bytes[0] != 0x51 || bytes[1] != 0x52 || bytes[2] != 0x52)
-                throw new Exception("Invalid raw data file. File type doesn't match \"QRR\".");
+            if (bytes.Count < 5 || bytes[0] != 0x51 || bytes[1] != 0x52 || bytes[2] != 0x52)
+                throw new InvalidDataException("Invalid raw data file. File type doesn't match \"QRR\".");
 
-            //Set QR code version
+            //Set QR code version with bounds checking
             var sideLen = (int)bytes[4];
+            if (sideLen < 21 || sideLen > MaxSideLength)
+                throw new ArgumentOutOfRangeException(nameof(rawData), $"Invalid QR code side length: {sideLen}. Must be between 21 and {MaxSideLength}.");
+
             bytes.RemoveRange(0, 5);
             Version = (sideLen - 21 - 8) / 4 + 1;
+
+            if (Version < 1 || Version > 40)
+                throw new ArgumentOutOfRangeException(nameof(rawData), $"Invalid QR code version: {Version}. Must be between 1 and 40.");
+
+            //Verify we have enough data
+            var requiredBits = sideLen * sideLen;
+            var availableBits = bytes.Count * 8;
+            if (availableBits < requiredBits)
+                throw new InvalidDataException($"Insufficient data for QR code. Need {requiredBits} bits, have {availableBits}.");
 
             //Unpack
             var modules = new Queue<bool>(8 * bytes.Count);
             foreach (var b in bytes)
             {
-                var bArr = new BitArray(new byte[] { b });
                 for (var i = 7; i >= 0; i--)
                 {
                     modules.Enqueue((b & (1 << i)) != 0);
@@ -71,7 +97,22 @@ namespace Steeltype.QRCoderLite
                     ModuleMatrix[y][x] = modules.Dequeue();
                 }
             }
+        }
 
+        private static void CopyToWithLimit(Stream source, Stream destination, int maxBytes)
+        {
+            var buffer = new byte[81920];
+            int bytesRead;
+            var totalBytesRead = 0;
+
+            while ((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                totalBytesRead += bytesRead;
+                if (totalBytesRead > maxBytes)
+                    throw new InvalidDataException($"Decompressed data exceeds maximum allowed size of {maxBytes} bytes.");
+
+                destination.Write(buffer, 0, bytesRead);
+            }
         }
 
         public byte[] GetRawData(Compression compressMode)

@@ -173,13 +173,28 @@ namespace Steeltype.QRCoderLite
             /// <summary>
             /// Generates a geo location payload. Supports raw location (GEO encoding) or Google Maps link (GoogleMaps encoding)
             /// </summary>
-            /// <param name="latitude">Latitude with . as splitter</param>
-            /// <param name="longitude">Longitude with . as splitter</param>
+            /// <param name="latitude">Latitude with . as splitter (-90 to 90)</param>
+            /// <param name="longitude">Longitude with . as splitter (-180 to 180)</param>
             /// <param name="encoding">Encoding type - GEO or GoogleMaps</param>
             public Geolocation(string latitude, string longitude, GeolocationEncoding encoding = GeolocationEncoding.GEO)
             {
+                if (string.IsNullOrWhiteSpace(latitude))
+                    throw new ArgumentException("Latitude cannot be null or empty.", nameof(latitude));
+                if (string.IsNullOrWhiteSpace(longitude))
+                    throw new ArgumentException("Longitude cannot be null or empty.", nameof(longitude));
+
                 this.latitude = latitude.Replace(",", ".");
                 this.longitude = longitude.Replace(",", ".");
+
+                // Validate that coordinates are numeric and within valid ranges
+                if (!double.TryParse(this.latitude, NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) ||
+                    lat < -90 || lat > 90)
+                    throw new ArgumentOutOfRangeException(nameof(latitude), "Latitude must be a number between -90 and 90.");
+
+                if (!double.TryParse(this.longitude, NumberStyles.Float, CultureInfo.InvariantCulture, out var lon) ||
+                    lon < -180 || lon > 180)
+                    throw new ArgumentOutOfRangeException(nameof(longitude), "Longitude must be a number between -180 and 180.");
+
                 this.encoding = encoding;
             }
 
@@ -190,7 +205,7 @@ namespace Steeltype.QRCoderLite
                     case GeolocationEncoding.GEO:
                         return $"geo:{latitude},{longitude}";
                     case GeolocationEncoding.GoogleMaps:
-                        return $"http://maps.google.com/maps?q={latitude},{longitude}";
+                        return $"http://maps.google.com/maps?q={Uri.EscapeDataString(latitude)},{Uri.EscapeDataString(longitude)}";
                     default:
                         return "geo:";
                 }
@@ -271,8 +286,8 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                var cleanedPhone = Regex.Replace(number, @"^[0+]+|[ ()-]", string.Empty);
-                return ($"https://wa.me/{cleanedPhone}?text={Uri.EscapeDataString(message)}");
+                var cleanedPhone = Regex.Replace(number ?? string.Empty, @"^[0+]+|[ ()-]", string.Empty, RegexOptions.None, TimeSpan.FromMilliseconds(100));
+                return $"https://wa.me/{cleanedPhone}?text={Uri.EscapeDataString(message ?? string.Empty)}";
             }
         }
 
@@ -771,11 +786,13 @@ namespace Steeltype.QRCoderLite
 
         private static string EscapeInput(string inp, bool simple = false)
         {
-            char[] forbiddenChars = { '\\', ';', ',', ':' };
-            if (simple)
-            {
-                forbiddenChars = new char[1] { ':' };
-            }
+            if (string.IsNullOrEmpty(inp))
+                return inp ?? string.Empty;
+
+            char[] forbiddenChars = simple
+                ? new[] { ':' }
+                : new[] { '\\', ';', ',', ':' };
+
             foreach (var c in forbiddenChars)
             {
                 inp = inp.Replace(c.ToString(), "\\" + c);
@@ -785,7 +802,9 @@ namespace Steeltype.QRCoderLite
 
         private static bool IsHexStyle(string inp)
         {
-            return Regex.IsMatch(inp, @"\A(0[xX])?[0-9a-fA-F]+\Z");
+            if (string.IsNullOrEmpty(inp))
+                return false;
+            return Regex.IsMatch(inp, @"\A(0[xX])?[0-9a-fA-F]+\Z", RegexOptions.None, TimeSpan.FromMilliseconds(100));
         }
     }
 }

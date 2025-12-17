@@ -10,6 +10,11 @@ namespace Steeltype.QRCoderLite
         private static readonly byte[] BmpHeaderPart2 = { 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00 };
         private static readonly byte[] BmpHeaderEnd = { 0x01, 0x00, 0x18, 0x00 }; // 1 plane, 24-bit color
 
+        /// <summary>
+        /// Maximum pixels per module to prevent memory exhaustion (limits output to ~100 MB).
+        /// </summary>
+        private const int MaxPixelsPerModule = 100;
+
         public BitmapByteQRCode() { }
 
         public BitmapByteQRCode(QRCodeData data) : base(data) { }
@@ -31,6 +36,11 @@ namespace Steeltype.QRCoderLite
         /// </summary>
         public byte[] GetGraphic(int pixelsPerModule, byte[] darkColorRgb, byte[] lightColorRgb)
         {
+            if (pixelsPerModule < 1)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), "Pixels per module must be at least 1.");
+            if (pixelsPerModule > MaxPixelsPerModule)
+                throw new ArgumentOutOfRangeException(nameof(pixelsPerModule), $"Pixels per module cannot exceed {MaxPixelsPerModule}.");
+
             var sideLength = QrCodeData.ModuleMatrix.Count * pixelsPerModule;
 
             // Pre-calculate color bytes for a full module width (BGR format for BMP)
