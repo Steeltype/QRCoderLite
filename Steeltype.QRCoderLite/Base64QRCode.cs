@@ -1,22 +1,20 @@
-﻿using SkiaSharp;
-
 namespace Steeltype.QRCoderLite
 {
     public class Base64QRCode : AbstractQRCode, IDisposable
     {
-        private readonly QRCode qr;
+        private readonly PngByteQRCode qr;
 
         /// <summary>
         /// Constructor without params to be used in COM Objects connections
         /// </summary>
         public Base64QRCode()
         {
-            qr = new QRCode();
+            qr = new PngByteQRCode();
         }
 
         public Base64QRCode(QRCodeData data) : base(data)
         {
-            qr = new QRCode(data);
+            qr = new PngByteQRCode(data);
         }
 
         public override void SetQRCodeData(QRCodeData data)
@@ -24,50 +22,42 @@ namespace Steeltype.QRCoderLite
             qr.SetQRCodeData(data);
         }
 
-        public string GetGraphic(int pixelsPerModule)
+        /// <summary>
+        /// Returns the QR code as a base64-encoded PNG string (black and white).
+        /// </summary>
+        public string GetGraphic(int pixelsPerModule, bool drawQuietZones = true)
         {
-            return GetGraphic(pixelsPerModule, SKColors.Black, SKColors.White, true);
+            return Convert.ToBase64String(qr.GetGraphic(pixelsPerModule, drawQuietZones));
         }
 
-
-        public string GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
+        /// <summary>
+        /// Returns the QR code as a base64-encoded PNG string with custom colors.
+        /// Colors are specified as HTML hex strings (e.g., "#000000" for black).
+        /// </summary>
+        public string GetGraphic(int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, bool drawQuietZones = true)
         {
-            return GetGraphic(pixelsPerModule, SKColor.Parse(darkColorHtmlHex), SKColor.Parse(lightColorHtmlHex), drawQuietZones, imgType);
+            var darkColor = Utilities.HexColorToByteArray(darkColorHtmlHex);
+            var lightColor = Utilities.HexColorToByteArray(lightColorHtmlHex);
+            return Convert.ToBase64String(qr.GetGraphic(pixelsPerModule, darkColor, lightColor, drawQuietZones));
         }
 
-        public string GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
+        /// <summary>
+        /// Returns the QR code as a base64-encoded PNG string with custom RGBA colors.
+        /// </summary>
+        public string GetGraphic(int pixelsPerModule, byte[] darkColorRgba, byte[] lightColorRgba, bool drawQuietZones = true)
         {
-            using SKBitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, drawQuietZones);
-            return BitmapToBase64(bmp, imgType);
-        }
-
-        public string GetGraphic(int pixelsPerModule, SKColor darkColor, SKColor lightColor, SKBitmap icon, int iconSizePercent = 15, int iconBorderWidth = 6, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
-        {
-            using SKBitmap bmp = qr.GetGraphic(pixelsPerModule, darkColor, lightColor, icon, iconSizePercent, iconBorderWidth, drawQuietZones);
-            return BitmapToBase64(bmp, imgType);
-        }
-
-        private string BitmapToBase64(SKBitmap bmp, SKEncodedImageFormat imgFormat)
-        {
-            using var image = SKImage.FromBitmap(bmp);
-            using var data = image.Encode(imgFormat, 100);
-            using var memoryStream = new MemoryStream();
-
-            // Write the image data to a memory stream
-            data.SaveTo(memoryStream);
-
-            return Convert.ToBase64String(memoryStream.ToArray());
+            return Convert.ToBase64String(qr.GetGraphic(pixelsPerModule, darkColorRgba, lightColorRgba, drawQuietZones));
         }
     }
 
     public static class Base64QRCodeHelper
     {
-        public static string GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, bool drawQuietZones = true, SKEncodedImageFormat imgType = SKEncodedImageFormat.Png)
+        public static string GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex, string lightColorHtmlHex, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1, bool drawQuietZones = true)
         {
             using var qrGenerator = new QRCodeGenerator();
             using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
             using var qrCode = new Base64QRCode(qrCodeData);
-            return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex, drawQuietZones, imgType);
+            return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex, drawQuietZones);
         }
     }
 }

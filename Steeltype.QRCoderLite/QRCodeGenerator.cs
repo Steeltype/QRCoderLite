@@ -1019,12 +1019,18 @@ namespace Steeltype.QRCoderLite
             return (encoding == EncodingMode.Byte && (!IsValidISO(plainText) || forceUtf8));
         }
 
+        /// <summary>
+        /// Checks if the given string can be accurately represented in ISO-8859-1 encoding.
+        /// ISO-8859-1 contains the same characters as UTF-16 for the range 0x00-0xFF.
+        /// </summary>
         private static bool IsValidISO(string input)
         {
-            var bytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(input);
-            //var result = Encoding.GetEncoding("ISO-8859-1").GetString(bytes);
-            var result = Encoding.GetEncoding("ISO-8859-1").GetString(bytes, 0, bytes.Length);
-            return String.Equals(input, result);
+            foreach (char c in input)
+            {
+                if (c > 0xFF)
+                    return false;
+            }
+            return true;
         }
 
         private static string PlainTextToBinary(string plainText, EncodingMode encMode, EciMode eciMode, bool utf8BOM, bool forceUtf8)

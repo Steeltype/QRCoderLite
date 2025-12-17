@@ -1,143 +1,172 @@
-﻿using SkiaSharp;
 using System.Globalization;
-using static Steeltype.QRCoderLite.QRCodeGenerator;
+using System.Text;
 
-/* This renderer is inspired by RemusVasii: https://github.com/codebude/QRCoder/issues/223 */
 namespace Steeltype.QRCoderLite
 {
-    // ReSharper disable once InconsistentNaming
-    public class PdfByteQRCode : AbstractQRCode, IDisposable
+    /// <summary>
+    /// Generates QR codes as PDF byte arrays without any external dependencies.
+    /// The PDF contains vector graphics that scale perfectly at any size.
+    /// </summary>
+    public sealed class PdfByteQRCode : AbstractQRCode, IDisposable
     {
-        private readonly byte[] pdfBinaryComment = new byte[] { 0x25, 0xe2, 0xe3, 0xcf, 0xd3 };
+        // Binary comment to ensure PDF is treated as binary (prevents text mode corruption)
+        private static readonly byte[] PdfBinaryComment = { 0x25, 0xe2, 0xe3, 0xcf, 0xd3 };
 
-        /// <summary>
-        /// Constructor without params to be used in COM Objects connections
-        /// </summary>
         public PdfByteQRCode() { }
 
         public PdfByteQRCode(QRCodeData data) : base(data) { }
 
         /// <summary>
-        /// Creates a PDF document with given colors DPI and quality
+        /// Creates a PDF document with a black and white QR code.
         /// </summary>
-        /// <param name="pixelsPerModule"></param>
-        /// <param name="darkColorHtmlHex"></param>
-        /// <param name="lightColorHtmlHex"></param>
-        /// <param name="dpi"></param>
-        /// <param name="jpgQuality"></param>
-        /// <returns></returns>
-        public byte[] GetGraphic(int pixelsPerModule, string darkColorHtmlHex = "#000000", string lightColorHtmlHex = "#ffffff", int dpi = 150, long jpgQuality = 85)
+        public byte[] GetGraphic(int pixelsPerModule)
+            => GetGraphic(pixelsPerModule, "#000000", "#ffffff");
+
+        /// <summary>
+        /// Creates a PDF document with the QR code in specified colors.
+        /// </summary>
+        /// <param name="pixelsPerModule">Size of each module in pixels.</param>
+        /// <param name="darkColorHex">Dark module color in hex format (e.g., "#000000").</param>
+        /// <param name="lightColorHex">Light module color in hex format (e.g., "#ffffff").</param>
+        /// <param name="dpi">DPI for the PDF (default 150).</param>
+        public byte[] GetGraphic(int pixelsPerModule, string darkColorHex, string lightColorHex, int dpi = 150)
         {
-            byte[] jpgArray = null, pngArray = null;
-            var imgSize = QrCodeData.ModuleMatrix.Count * pixelsPerModule;
-            var pdfMediaSize = (imgSize * 72 / dpi).ToString(CultureInfo.InvariantCulture);
+            var moduleCount = QrCodeData.ModuleMatrix.Count;
+            var imgSize = moduleCount * pixelsPerModule;
+            var pdfMediaSize = FloatToStr(imgSize * 72f / dpi);
 
-            //Get QR code image
-            using (var qrCode = new PngByteQRCode(QrCodeData))
-            {
-                pngArray = qrCode.GetGraphic(pixelsPerModule, Utilities.HexColorToByteArray(darkColorHtmlHex), Utilities.HexColorToByteArray(lightColorHtmlHex));
-            }
+            // Parse colors to PDF RGB format (0.0 to 1.0)
+            var darkColor = Utilities.HexColorToByteArray(darkColorHex);
+            var lightColor = Utilities.HexColorToByteArray(lightColorHex);
+            var darkColorPdf = ToPdfRgb(darkColor);
+            var lightColorPdf = ToPdfRgb(lightColor);
 
-            // Convert PNG byte array to SKBitmap
-            SKBitmap bitmap;
-            using (var msPng = new MemoryStream(pngArray))
-            {
-                bitmap = SKBitmap.Decode(msPng);
-            }
-
-            // Ensure the bitmap was successfully loaded
-            if (bitmap == null) throw new InvalidOperationException("Failed to load the PNG image.");
-
-            //Create image and transform to JPG
-            using (var image = SKImage.FromBitmap(bitmap))
-            {
-                // Encode the SKImage to JPEG format with the specified quality
-                using var data = image.Encode(SKEncodedImageFormat.Jpeg, (int)jpgQuality);
-                using var msJpeg = new MemoryStream();
-                data.SaveTo(msJpeg);
-                jpgArray = msJpeg.ToArray();
-            }
-
-            // Create PDF document
             using var stream = new MemoryStream();
-            var writer = new StreamWriter(stream, System.Text.Encoding.GetEncoding("ASCII"));
-            var xrefs = new List<long>(); // Cross-reference table for PDF objects
+            using var writer = new StreamWriter(stream, Encoding.ASCII, 1024, leaveOpen: true);
 
-            // Write PDF header
+            var xrefs = new List<long>();
+
+            // PDF header
             writer.Write("%PDF-1.5\r\n");
             writer.Flush();
 
-            // Binary comment to ensure the file is treated as binary
-            stream.Write(pdfBinaryComment, 0, pdfBinaryComment.Length);
+            // Binary comment
+            stream.Write(PdfBinaryComment, 0, PdfBinaryComment.Length);
             writer.WriteLine();
-
-            // Add first object: Root Catalog
-            writer.Flush(); // Flush to get an accurate position
-            xrefs.Add(stream.Position); // Record position for xref table
-            writer.Write($"{1} 0 obj\r\n<<\r\n/Type /Catalog\r\n/Pages 2 0 R\r\n>>\r\nendobj\r\n");
-
-            // Add second object: Page Tree (Pages dictionary)
-            writer.Flush(); // Flush to get an accurate position
-            xrefs.Add(stream.Position); // Record position for xref table
-            writer.Write($"{2} 0 obj\r\n<<\r\n/Count 1\r\n/Kids [3 0 R]\r\n>>\r\nendobj\r\n");
-
-            // Add third object: Page
-            writer.Flush(); // Flush to get an accurate position
-            xrefs.Add(stream.Position); // Record position for xref table
-            // Define a page with media size and reference to the content stream and resources
-            writer.Write($"{3} 0 obj\r\n<<\r\n/Type /Page\r\n/Parent 2 0 R\r\n/MediaBox [0 0 {pdfMediaSize} {pdfMediaSize}]\r\n/Contents 4 0 R\r\n/Resources << /ProcSet [/PDF /ImageC] /XObject << /Im1 5 0 R >> >>\r\n>>\r\nendobj\r\n");
-
-            // Add fourth object: Content Stream (how to draw the image)
-            var contentStream = $"q\r\n{pdfMediaSize} 0 0 {pdfMediaSize} 0 0 cm\r\n/Im1 Do\r\nQ";
-            writer.Flush(); // Flush to get an accurate position
-            xrefs.Add(stream.Position); // Record position for xref table
-            writer.Write($"{4} 0 obj\r\n<< /Length {contentStream.Length} >>\r\nstream\r\n{contentStream}\r\nendstream\r\nendobj\r\n");
-
-            // Add fifth object: Embedded Image
-            writer.Flush(); // Flush to get an accurate position
-            xrefs.Add(stream.Position); // Record position for xref table
-            writer.Write($"{5} 0 obj\r\n<<\r\n/Type /XObject\r\n/Subtype /Image\r\n/Width {imgSize}\r\n/Height {imgSize}\r\n/Length {jpgArray.Length}\r\n/Filter /DCTDecode\r\n/ColorSpace /DeviceRGB\r\n/BitsPerComponent 8\r\n>>\r\nstream\r\n");
-            writer.Flush(); // Flush before writing binary data
-            stream.Write(jpgArray, 0, jpgArray.Length); // Write the JPEG binary data
-            writer.Write("\r\nendstream\r\nendobj\r\n");
-
-            // Finalize document with xref table, trailer, and EOF
             writer.Flush();
-            xrefs.Add(stream.Position); // Record position for the length of JPEG data
-            writer.Write($"{6} 0 obj\r\n{jpgArray.Length}\r\nendobj\r\n");
-            var startxref = stream.Position; // Record start of xref table
-            writer.Write("xref\r\n0 " + (xrefs.Count + 1) + "\r\n0000000000 65535 f\r\n");
-            foreach (var refValue in xrefs)
-                writer.Write($"{refValue:0000000000} 00000 n\r\n"); // Write each object's position
-            // Write trailer and EOF
-            writer.Write($"trailer\r\n<<\r\n/Size {xrefs.Count + 1}\r\n/Root 1 0 R\r\n>>\r\nstartxref\r\n{startxref}\r\n%%EOF");
-            writer.Flush(); // Ensure all data is written to stream
 
-            stream.Position = 0;
+            // Object 1: Catalog
+            xrefs.Add(stream.Position);
+            writer.Write($"{xrefs.Count} 0 obj\r\n<<\r\n/Type /Catalog\r\n/Pages 2 0 R\r\n>>\r\nendobj\r\n");
+            writer.Flush();
+
+            // Object 2: Pages
+            xrefs.Add(stream.Position);
+            writer.Write($"{xrefs.Count} 0 obj\r\n<<\r\n/Count 1\r\n/Kids [ <<\r\n");
+            writer.Write($"/Type /Page\r\n/Parent 2 0 R\r\n");
+            writer.Write($"/MediaBox [0 0 {pdfMediaSize} {pdfMediaSize}]\r\n");
+            writer.Write("/Resources << /ProcSet [ /PDF ] >>\r\n");
+            writer.Write("/Contents 3 0 R\r\n>> ]\r\n>>\r\nendobj\r\n");
+            writer.Flush();
+
+            // Build content stream
+            var scale = FloatToStr(imgSize * 72f / dpi / moduleCount);
+            var pathCommands = BuildModulePath();
+
+            var content = new StringBuilder();
+            content.Append("q\r\n"); // Save graphics state
+            content.Append($"{scale} 0 0 -{scale} 0 {pdfMediaSize} cm\r\n"); // Transform matrix
+            content.Append($"{lightColorPdf} rg\r\n"); // Light color fill
+            content.Append($"0 0 {moduleCount} {moduleCount} re\r\n"); // Background rectangle
+            content.Append("f\r\n"); // Fill background
+            content.Append($"{darkColorPdf} rg\r\n"); // Dark color fill
+            content.Append(pathCommands); // Dark module rectangles
+            content.Append("f*\r\n"); // Fill with even-odd rule
+            content.Append("Q"); // Restore graphics state
+
+            var contentStr = content.ToString();
+
+            // Object 3: Content stream
+            xrefs.Add(stream.Position);
+            writer.Write($"{xrefs.Count} 0 obj\r\n<< /Length {contentStr.Length} >>\r\nstream\r\n");
+            writer.Write(contentStr);
+            writer.Write("endstream\r\nendobj\r\n");
+            writer.Flush();
+
+            var startxref = (int)stream.Position;
+
+            // Cross-reference table
+            writer.Write($"xref\r\n0 {xrefs.Count + 1}\r\n");
+            writer.Write("0000000000 65535 f\r\n");
+            foreach (var offset in xrefs)
+            {
+                writer.Write($"{(int)offset:D10} 00000 n\r\n");
+            }
+
+            // Trailer
+            writer.Write($"trailer\r\n<<\r\n/Size {xrefs.Count + 1}\r\n/Root 1 0 R\r\n>>\r\n");
+            writer.Write($"startxref\r\n{startxref}\r\n%%EOF");
+            writer.Flush();
 
             return stream.ToArray();
         }
+
+        /// <summary>
+        /// Creates PDF path commands for all dark modules using run-length encoding.
+        /// </summary>
+        private string BuildModulePath()
+        {
+            var path = new StringBuilder();
+            var matrix = QrCodeData.ModuleMatrix;
+            var size = matrix.Count;
+
+            for (int y = 0; y < size; y++)
+            {
+                int x = 0;
+                while (x < size)
+                {
+                    if (!matrix[y][x])
+                    {
+                        x++;
+                        continue;
+                    }
+
+                    // Found dark module - find run length
+                    int startX = x;
+                    while (x < size && matrix[y][x])
+                        x++;
+
+                    // Single rectangle for the run: x y width height re
+                    path.Append(startX.ToString(CultureInfo.InvariantCulture));
+                    path.Append(' ');
+                    path.Append(y.ToString(CultureInfo.InvariantCulture));
+                    path.Append(' ');
+                    path.Append((x - startX).ToString(CultureInfo.InvariantCulture));
+                    path.Append(" 1 re\r\n");
+                }
+            }
+
+            return path.ToString();
+        }
+
+        private static string ToPdfRgb(byte[] rgb)
+        {
+            const float inv255 = 1f / 255f;
+            return $"{FloatToStr(rgb[0] * inv255)} {FloatToStr(rgb[1] * inv255)} {FloatToStr(rgb[2] * inv255)}";
+        }
+
+        private static string FloatToStr(float value)
+            => value.ToString("0.######", CultureInfo.InvariantCulture);
     }
 
     public static class PdfByteQRCodeHelper
     {
-        public static byte[] GetQRCode(string plainText, int pixelsPerModule, string darkColorHtmlHex,
-            string lightColorHtmlHex, ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false,
-            EciMode eciMode = EciMode.Default, int requestedVersion = -1)
+        public static byte[] GetQRCode(string plainText, int pixelsPerModule, string darkColorHex, string lightColorHex, QRCodeGenerator.ECCLevel eccLevel, bool forceUtf8 = false, bool utf8BOM = false, QRCodeGenerator.EciMode eciMode = QRCodeGenerator.EciMode.Default, int requestedVersion = -1)
         {
             using var qrGenerator = new QRCodeGenerator();
-            using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode,
-                requestedVersion);
+            using var qrCodeData = qrGenerator.CreateQrCode(plainText, eccLevel, forceUtf8, utf8BOM, eciMode, requestedVersion);
             using var qrCode = new PdfByteQRCode(qrCodeData);
-            return qrCode.GetGraphic(pixelsPerModule, darkColorHtmlHex, lightColorHtmlHex);
-        }
-
-        public static byte[] GetQRCode(string txt, ECCLevel eccLevel, int size)
-        {
-            using var qrGen = new QRCodeGenerator();
-            using var qrCode = qrGen.CreateQrCode(txt, eccLevel);
-            using var qrBmp = new PdfByteQRCode(qrCode);
-            return qrBmp.GetGraphic(size);
+            return qrCode.GetGraphic(pixelsPerModule, darkColorHex, lightColorHex);
         }
     }
 }
