@@ -6,11 +6,10 @@ using Xunit;
 namespace Steeltype.QRCoderLite.Tests
 {
     /****************************************************************************************************
-     * Note: Test cases compare the outcome visually even if it's slower than a byte-wise compare.
-     *       This is necessary, because the Deflate implementation differs on the different target
-     *       platforms and thus the outcome, even if visually identical, differs. Thus only a visual
-     *       test method makes sense. In addition bytewise differences shouldn't be important, if the
-     *       visual outcome is identical and thus the qr code is identical/scannable.
+     * Note: Expectations are hashes of the DECODED PNG content (IHDR/PLTE/tRNS chunk data plus the
+     *       inflated IDAT scanlines) via HelperFunctions.PngContentHash, NOT of the raw file bytes.
+     *       DeflateStream emits different (equally valid) compressed bytes per platform, so raw-file
+     *       hashes fail cross-platform CI; the decoded content is identical everywhere.
      ****************************************************************************************************/
     public class PngByteQRCodeRendererTests
     {
@@ -23,8 +22,8 @@ namespace Steeltype.QRCoderLite.Tests
             var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
             var pngCodeGfx = new PngByteQRCode(data).GetGraphic(5);
 
-            var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("5bfcd2d9104202f08d24f901ff969624");
+            var result = HelperFunctions.PngContentHash(pngCodeGfx);
+            result.ShouldBe("34492655df1be8746cf2bdabf9da773a");
         }
 
         [Fact]
@@ -36,8 +35,8 @@ namespace Steeltype.QRCoderLite.Tests
             var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
             var pngCodeGfx = new PngByteQRCode(data).GetGraphic(5, new byte[] { 255, 0, 0 }, new byte[] { 0, 0, 255 });
 
-            var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("5e81e89553c27cf643659df1fab8824f");
+            var result = HelperFunctions.PngContentHash(pngCodeGfx);
+            result.ShouldBe("a8266054916dc674e0a6dcf40bce6b80");
         }
 
 
@@ -50,8 +49,8 @@ namespace Steeltype.QRCoderLite.Tests
             var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
             var pngCodeGfx = new PngByteQRCode(data).GetGraphic(5, new byte[] { 255, 255, 255, 127 }, new byte[] { 0, 0, 255 });
 
-            var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("c33b18d24346db48dce73fb0a5511bdd");
+            var result = HelperFunctions.PngContentHash(pngCodeGfx);
+            result.ShouldBe("b20d400246e34bb03078123663e58aee");
         }
 
         [Fact]
@@ -63,8 +62,8 @@ namespace Steeltype.QRCoderLite.Tests
             var data = gen.CreateQrCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L);
             var pngCodeGfx = new PngByteQRCode(data).GetGraphic(5, new byte[] { 255, 255, 255, 127 }, new byte[] { 0, 0, 255 }, false);
 
-            var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("07f760b3eb54901840b094d31e299713");
+            var result = HelperFunctions.PngContentHash(pngCodeGfx);
+            result.ShouldBe("2c284646c4f4e338e181da5c075689e2");
         }
 
         [Fact]
@@ -83,8 +82,8 @@ namespace Steeltype.QRCoderLite.Tests
             //Create QR code                   
             var pngCodeGfx = PngByteQRCodeHelper.GetQRCode("This is a quick test! 123#?", QRCodeGenerator.ECCLevel.L, 10);
 
-            var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("64f0efa9d5a29660b1c0070e33a32ec7");
+            var result = HelperFunctions.PngContentHash(pngCodeGfx);
+            result.ShouldBe("d0dc2df14b0a0b65b11de1230962485c");
         }
 
         [Fact]
@@ -94,8 +93,8 @@ namespace Steeltype.QRCoderLite.Tests
             //Create QR code                   
             var pngCodeGfx = PngByteQRCodeHelper.GetQRCode("This is a quick test! 123#?", 5, new byte[] { 255, 255, 255, 127 }, new byte[] { 0, 0, 255 }, QRCodeGenerator.ECCLevel.L);
 
-            var result = HelperFunctions.ByteArrayToHash(pngCodeGfx);
-            result.ShouldBe("c33b18d24346db48dce73fb0a5511bdd");
+            var result = HelperFunctions.PngContentHash(pngCodeGfx);
+            result.ShouldBe("b20d400246e34bb03078123663e58aee");
         }
 
     }

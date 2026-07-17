@@ -26,7 +26,7 @@ byte[] qrCodePng = qrCode.GetGraphic(20);
 Every renderer also has a static helper for one-line generation:
 
 ```csharp
-byte[] qrCodePng = PngByteQRCodeHelper.GetQRCode("The text which should be encoded.", 20, QRCodeGenerator.ECCLevel.Q);
+byte[] qrCodePng = PngByteQRCodeHelper.GetQRCode("The text which should be encoded.", QRCodeGenerator.ECCLevel.Q, 20);
 ```
 
 ### Renderers

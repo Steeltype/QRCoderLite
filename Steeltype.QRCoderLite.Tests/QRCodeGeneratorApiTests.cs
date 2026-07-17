@@ -92,10 +92,11 @@ namespace Steeltype.QRCoderLite.Tests
         [Category("QRGenerator/Eci")]
         public void explicit_eci_utf8_produces_different_matrix_than_default()
         {
-            // Regression: the ISO-8859-1 fast path used to hijack explicit ECI requests, so an
-            // ISO-representable string like "café" produced ISO bytes under a UTF-8 ECI header.
-            // With the fix, an explicit UTF-8 ECI mode must actually encode UTF-8 bytes and emit
-            // the ECI header, which yields a different matrix than the default ISO path.
+            // Sanity check: an explicit UTF-8 ECI request must differ from the default ISO path
+            // (ECI header + UTF-8 bytes vs no header + ISO bytes). NOTE this test alone does NOT
+            // lock the fast-path fix — the pre-fix encoder also differed here because it already
+            // wrote the ECI header (over wrong ISO bytes). The actual regression lock is the
+            // sibling test explicit_eci_utf8_matches_forced_utf8_with_same_eci below.
             var gen = new QRCodeGenerator();
             var defaultMode = gen.CreateQrCode("café", QRCodeGenerator.ECCLevel.L, eciMode: QRCodeGenerator.EciMode.Default);
             var explicitUtf8 = gen.CreateQrCode("café", QRCodeGenerator.ECCLevel.L, eciMode: QRCodeGenerator.EciMode.Utf8);
@@ -118,12 +119,29 @@ namespace Steeltype.QRCoderLite.Tests
         [Category("QRGenerator/Eci")]
         public void eci_header_reservation_pushes_41_digits_to_version_2()
         {
-            // Regression: version selection used to reserve a flat 2 characters for the 12-bit
-            // ECI header, under-reserving in Numeric mode (2 chars = 6.6 bits) and silently
-            // truncating data. Numeric version 1-L holds 41 digits; with the mode-correct 4-digit
-            // reservation, 41 digits + ECI header must select version 2 and not throw.
+            // 41 digits exceed version 1-L numeric capacity (41) once any ECI reservation is
+            // added, so version 2 must be selected. (Both the flat-2 and mode-correct reservation
+            // agree here; the true regression lock is the 38/39-digit window test below.)
             var gen = new QRCodeGenerator();
             var qrData = gen.CreateQrCode(new string('7', 41), QRCodeGenerator.ECCLevel.L, eciMode: QRCodeGenerator.EciMode.Utf8);
+            qrData.Version.ShouldBe(2);
+        }
+
+        [Theory]
+        [InlineData(38)]
+        [InlineData(39)]
+        [Category("QRGenerator/Eci")]
+        public void eci_header_reservation_pushes_38_and_39_digits_to_version_2(int digitCount)
+        {
+            // REGRESSION LOCK for the flat-2-character ECI reservation bug: version selection
+            // used to reserve 2 'characters' for the 12-bit ECI header, but 2 numeric chars are
+            // only ~6.7 bits. For 38-39 digits the buggy math still chose version 1
+            // (38+2=40 <= 41) while the actual encoded stream (mode 4 + ECI 12 + count 10 +
+            // data 127/130 bits = 153/156) exceeds the 152-bit v1-L capacity — silently
+            // truncating data bits into an undecodable QR. The mode-correct 4-digit reservation
+            // (38+4=42 > 41) must select version 2. This Theory FAILS against the pre-fix code.
+            var gen = new QRCodeGenerator();
+            var qrData = gen.CreateQrCode(new string('7', digitCount), QRCodeGenerator.ECCLevel.L, eciMode: QRCodeGenerator.EciMode.Utf8);
             qrData.Version.ShouldBe(2);
         }
 
