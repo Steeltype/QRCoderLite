@@ -219,3 +219,6 @@ pip-log.txt
 *.userprefs
 
 QRCoder/PortabilityAnalysis.html
+
+# Internal-only docs (audits, session notes) - never commit to this public repo
+docs-internal/
