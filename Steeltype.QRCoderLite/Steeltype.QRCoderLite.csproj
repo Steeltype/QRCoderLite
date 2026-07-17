@@ -3,13 +3,14 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Version>2.0.0</Version>
 		<Title>Steeltype.QRCoderLite</Title>
-		<Description>A lightweight, zero-dependency QR code generator for .NET 8. Generates PNG and ASCII output with no external dependencies.</Description>
-		<Copyright>Copyright 2024 Steeltype LLC, released under BSD-3-Clause</Copyright>
+		<Description>A lightweight, zero-dependency QR code generator for .NET 8. Renders PNG, SVG (with optional logo), ASCII, Base64, BMP, and PDF output with no external dependencies, plus payload generators for WiFi, contacts, calendar events, OTP, and more.</Description>
+		<Copyright>Copyright 2024-2026 Steeltype LLC, released under BSD-3-Clause</Copyright>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/Steeltype/QRCoderLite</RepositoryUrl>
-		<PackageTags>qr;qrcode;qr-generator;qr-code-generator;png;zero-dependency;net8</PackageTags>
-		<PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+		<PackageTags>qr;qrcode;qr-generator;qr-code-generator;png;svg;pdf;bmp;ascii;base64;zero-dependency;net8</PackageTags>
+		<PackageReleaseNotes>2.0.0 — Breaking: removed SkiaSharp dependency and with it the QRCode (Bitmap), ArtQRCode, and PostscriptQRCode renderers; removed the obsolete OneTimePassword.Algorithm member, BitmapByteQRCodeHelper.GetQRCode(string, ECCLevel, int), PdfByteQRCode jpgQuality parameter, and Base64QRCode Skia overloads (Base64 output is now 1-bit PNG). New: SvgQRCode renderer (with logo support), OneTimePassword and Bitcoin/BitcoinCash/Litecoin payload generators, input validation with hard limits (pixelsPerModule 1-100 for PNG/BMP/ASCII and 1-1000 for SVG/PDF; PDF dpi 1-2400; SVG logo max 5 MB; 10 MB decompression cap on QRCodeData raw data). Fixed: explicit ECI modes now encode payload bytes matching the declared designator; ASCII renderer no longer transposes output; PDF page tree is spec-compliant; Url payload handles uppercase schemes; vCard/MeCard ADR field order follows RFC 2426; CalendarEvent/ContactData dates are culture-invariant and UTC times carry the Z suffix; WiFi emits standard lowercase nopass and supports WPA2; OTP labels without an issuer are no longer dropped.</PackageReleaseNotes>
 		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
 	</PropertyGroup>
 	<ItemGroup>
