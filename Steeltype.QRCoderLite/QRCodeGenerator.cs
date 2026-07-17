@@ -123,15 +123,16 @@ namespace Steeltype.QRCoderLite
             var encoding = GetEncodingFromPlaintext(plainText, forceUtf8);
             var codedText = PlainTextToBinary(plainText, encoding, eciMode, utf8BOM, forceUtf8);
             var dataInputLength = GetDataLength(encoding, plainText, codedText, forceUtf8);
+            var eciHeaderReservation = GetEciHeaderCharacterReservation(encoding, eciMode);
             var version = requestedVersion;
             if (version == -1)
             {
-                version = GetVersion(dataInputLength + (eciMode != EciMode.Default ? 2 : 0), encoding, eccLevel);
+                version = GetVersion(dataInputLength + eciHeaderReservation, encoding, eccLevel);
             }
             else
             {
                 //Version was passed as fixed version via parameter. Thus let's check if chosen version is valid.
-                var minVersion = GetVersion(dataInputLength + (eciMode != EciMode.Default ? 2 : 0), encoding, eccLevel);
+                var minVersion = GetVersion(dataInputLength + eciHeaderReservation, encoding, eccLevel);
                 if (minVersion > version)
                 {
                     var maxSizeByte = capacityTable[version - 1].Details.First(x => x.ErrorCorrectionLevel == eccLevel).CapacityDict[encoding];
@@ -185,12 +186,18 @@ namespace Steeltype.QRCoderLite
             var eccInfo = capacityECCTable.Single(x => x.Version == version && x.ErrorCorrectionLevel == eccLevel);
             var dataLength = eccInfo.TotalDataCodewords * 8;
             var lengthDiff = dataLength - bitString.Length;
+            // Real data exceeding capacity means the version-selection math is wrong; truncating
+            // it would silently produce an undecodable QR code, so fail loudly instead.
+            if (lengthDiff < 0)
+                throw new InvalidOperationException($"Encoded data ({bitString.Length} bits) exceeds the capacity of QR version {version} ({dataLength} bits). This indicates an internal capacity calculation error.");
             if (lengthDiff > 0)
                 bitString += new string('0', Math.Min(lengthDiff, 4));
             if ((bitString.Length % 8) != 0)
                 bitString += new string('0', 8 - (bitString.Length % 8));
             while (bitString.Length < dataLength)
                 bitString += "1110110000010001";
+            // The 16-bit pad word can overshoot the capacity; trim the overshoot (pad bits only,
+            // never data — the guard above already ensured the data itself fits).
             if (bitString.Length > dataLength)
                 bitString = bitString.Substring(0, dataLength);
 
@@ -860,6 +867,23 @@ namespace Steeltype.QRCoderLite
             return newPoly;
         }
 
+        /// <summary>
+        /// The ECI header costs 12 bits (4-bit mode indicator + 8-bit designator), but the capacity
+        /// table is denominated in characters of the data encoding. Reserve enough characters to
+        /// cover those 12 bits: Numeric packs 3 chars per 10 bits, Alphanumeric 2 per 11, Byte 1 per 8.
+        /// </summary>
+        private static int GetEciHeaderCharacterReservation(EncodingMode encoding, EciMode eciMode)
+        {
+            if (eciMode == EciMode.Default)
+                return 0;
+            return encoding switch
+            {
+                EncodingMode.Numeric => 4,      // 4 chars = 13.3 bits >= 12
+                EncodingMode.Alphanumeric => 3, // 3 chars = 16.5 bits >= 12
+                _ => 2,                         // 2 bytes = 16 bits >= 12
+            };
+        }
+
         private static int GetVersion(int length, EncodingMode encMode, ECCLevel eccLevel)
         {
 
@@ -1011,12 +1035,10 @@ namespace Steeltype.QRCoderLite
 
         private static int GetDataLength(EncodingMode encoding, string plainText, string codedText, bool forceUtf8)
         {
-            return forceUtf8 || IsUtf8(encoding, plainText, forceUtf8) ? (codedText.Length / 8) : plainText.Length;
-        }
-
-        private static bool IsUtf8(EncodingMode encoding, string plainText, bool forceUtf8)
-        {
-            return (encoding == EncodingMode.Byte && (!IsValidISO(plainText) || forceUtf8));
+            // Byte mode's count indicator counts encoded BYTES, which codedText reflects exactly
+            // for every encoding path (ISO, UTF-8, BOM, explicit ECI). Character count only
+            // applies to Numeric/Alphanumeric, whose count indicators count characters.
+            return encoding == EncodingMode.Byte ? (codedText.Length / 8) : plainText.Length;
         }
 
         /// <summary>
@@ -1117,7 +1139,9 @@ namespace Steeltype.QRCoderLite
             byte[] codeBytes;
             var codeText = string.Empty;
 
-            if (IsValidISO(plainText) && !forceUtf8)
+            // The ISO-8859-1 fast path is only valid when no explicit ECI mode was requested;
+            // otherwise the payload bytes must match the ECI designator written in the header.
+            if (eciMode == EciMode.Default && IsValidISO(plainText) && !forceUtf8)
                 codeBytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(plainText);
             else
             {

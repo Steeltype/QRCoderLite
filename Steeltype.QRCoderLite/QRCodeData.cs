@@ -26,6 +26,11 @@ namespace Steeltype.QRCoderLite
         /// </summary>
         private const int MaxSideLength = 177 + 8; // Version 40 + quiet zone
 
+        /// <summary>
+        /// Minimum QR code version (1) has 21x21 modules; serialized data always includes the 8-module quiet zone.
+        /// </summary>
+        private const int MinSideLength = 21 + 8; // Version 1 + quiet zone
+
         public QRCodeData(byte[] rawData, Compression compressMode)
         {
             ArgumentNullException.ThrowIfNull(rawData);
@@ -62,8 +67,12 @@ namespace Steeltype.QRCoderLite
 
             //Set QR code version with bounds checking
             var sideLen = (int)bytes[4];
-            if (sideLen < 21 || sideLen > MaxSideLength)
-                throw new ArgumentOutOfRangeException(nameof(rawData), $"Invalid QR code side length: {sideLen}. Must be between 21 and {MaxSideLength}.");
+            if (sideLen < MinSideLength || sideLen > MaxSideLength)
+                throw new ArgumentOutOfRangeException(nameof(rawData), $"Invalid QR code side length: {sideLen}. Must be between {MinSideLength} and {MaxSideLength}.");
+
+            //Side lengths grow in steps of 4 modules per version; anything else is corrupt data
+            if ((sideLen - MinSideLength) % 4 != 0)
+                throw new InvalidDataException($"Invalid QR code side length: {sideLen}. Not a valid QR code size.");
 
             bytes.RemoveRange(0, 5);
             Version = (sideLen - 21 - 8) / 4 + 1;

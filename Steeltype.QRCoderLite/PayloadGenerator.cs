@@ -33,7 +33,8 @@ namespace Steeltype.QRCoderLite
                 this.ssid = escapeHexStrings && IsHexStyle(this.ssid) ? "\"" + this.ssid + "\"" : this.ssid;
                 this.password = EscapeInput(password);
                 this.password = escapeHexStrings && IsHexStyle(this.password) ? "\"" + this.password + "\"" : this.password;
-                this.authenticationMode = authenticationMode.ToString();
+                // The ZXing WIFI format expects lowercase "nopass"; the other modes match their member names.
+                this.authenticationMode = authenticationMode == Authentication.Nopass ? "nopass" : authenticationMode.ToString();
                 isHiddenSsid = isHiddenSSID;
             }
 
@@ -47,7 +48,8 @@ namespace Steeltype.QRCoderLite
             {
                 WEP,
                 WPA,
-                Nopass
+                Nopass,
+                WPA2
             }
         }
 
@@ -252,7 +254,7 @@ namespace Steeltype.QRCoderLite
 
             public override string ToString()
             {
-                return (!url.StartsWith("http") ? "http://" + url : url);
+                return (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? "http://" + url : url);
             }
         }
 
@@ -407,11 +409,12 @@ namespace Steeltype.QRCoderLite
                     if (!string.IsNullOrEmpty(note))
                         payload += $"NOTE:{note}\r\n";
                     if (birthday != null)
-                        payload += $"BDAY:{((DateTime)birthday).ToString("yyyyMMdd")}\r\n";
+                        payload += $"BDAY:{((DateTime)birthday).ToString("yyyyMMdd", CultureInfo.InvariantCulture)}\r\n";
+                    // ADR field order per RFC 2426 sec. 3.2.1: PO Box; Extended; Street; Locality (city); Region; Postal Code; Country
                     var addressString = string.Empty;
                     if (addressOrder == AddressOrder.Default)
                     {
-                        addressString = $"ADR:,,{(!string.IsNullOrEmpty(street) ? street + " " : "")}{(!string.IsNullOrEmpty(houseNumber) ? houseNumber : "")},{(!string.IsNullOrEmpty(zipCode) ? zipCode : "")},{(!string.IsNullOrEmpty(city) ? city : "")},{(!string.IsNullOrEmpty(stateRegion) ? stateRegion : "")},{(!string.IsNullOrEmpty(country) ? country : "")}\r\n";
+                        addressString = $"ADR:,,{(!string.IsNullOrEmpty(street) ? street + " " : "")}{(!string.IsNullOrEmpty(houseNumber) ? houseNumber : "")},{(!string.IsNullOrEmpty(city) ? city : "")},{(!string.IsNullOrEmpty(stateRegion) ? stateRegion : "")},{(!string.IsNullOrEmpty(zipCode) ? zipCode : "")},{(!string.IsNullOrEmpty(country) ? country : "")}\r\n";
                     }
                     else
                     {
@@ -488,10 +491,11 @@ namespace Steeltype.QRCoderLite
                         payload += "TYPE=HOME,PREF:";
                     else
                         payload += "TYPE=home,pref:";
+                    // ADR field order per RFC 2426 sec. 3.2.1: PO Box; Extended; Street; Locality (city); Region; Postal Code; Country
                     var addressString = string.Empty;
                     if (addressOrder == AddressOrder.Default)
                     {
-                        addressString = $";;{(!string.IsNullOrEmpty(street) ? street + " " : "")}{(!string.IsNullOrEmpty(houseNumber) ? houseNumber : "")};{(!string.IsNullOrEmpty(zipCode) ? zipCode : "")};{(!string.IsNullOrEmpty(city) ? city : "")};{(!string.IsNullOrEmpty(stateRegion) ? stateRegion : "")};{(!string.IsNullOrEmpty(country) ? country : "")}\r\n";
+                        addressString = $";;{(!string.IsNullOrEmpty(street) ? street + " " : "")}{(!string.IsNullOrEmpty(houseNumber) ? houseNumber : "")};{(!string.IsNullOrEmpty(city) ? city : "")};{(!string.IsNullOrEmpty(stateRegion) ? stateRegion : "")};{(!string.IsNullOrEmpty(zipCode) ? zipCode : "")};{(!string.IsNullOrEmpty(country) ? country : "")}\r\n";
                     }
                     else
                     {
@@ -500,7 +504,7 @@ namespace Steeltype.QRCoderLite
                     payload += addressString;
 
                     if (birthday != null)
-                        payload += $"BDAY:{((DateTime)birthday).ToString("yyyyMMdd")}\r\n";
+                        payload += $"BDAY:{((DateTime)birthday).ToString("yyyyMMdd", CultureInfo.InvariantCulture)}\r\n";
                     if (!string.IsNullOrEmpty(website))
                         payload += $"URL:{website}\r\n";
                     if (!string.IsNullOrEmpty(email))
@@ -560,9 +564,17 @@ namespace Steeltype.QRCoderLite
                 this.description = description;
                 this.location = location;
                 this.encoding = encoding;
-                var dtFormat = allDayEvent ? "yyyyMMdd" : "yyyyMMddTHHmmss";
-                this.start = start.ToString(dtFormat);
-                this.end = end.ToString(dtFormat);
+                this.start = FormatEventDateTime(start, allDayEvent);
+                this.end = FormatEventDateTime(end, allDayEvent);
+            }
+
+            private static string FormatEventDateTime(DateTime dateTime, bool allDayEvent)
+            {
+                // UTC times must carry the iCalendar 'Z' suffix, otherwise they decode as floating local time.
+                var dtFormat = allDayEvent
+                    ? "yyyyMMdd"
+                    : (dateTime.Kind == DateTimeKind.Utc ? "yyyyMMddTHHmmss\\Z" : "yyyyMMddTHHmmss");
+                return dateTime.ToString(dtFormat, CultureInfo.InvariantCulture);
             }
 
             public override string ToString()
@@ -672,10 +684,14 @@ namespace Steeltype.QRCoderLite
                     escapedLabel = Uri.EscapeDataString(Label);
                 }
 
+                // The Key Uri Format label is "issuer:account" when both are set, otherwise
+                // whichever one is present — a set Label must never be silently dropped.
                 if (escapedLabel != null && escapedIssuer != null)
                     sb.Append(escapedIssuer + ":" + escapedLabel);
                 else if (escapedIssuer != null)
                     sb.Append(escapedIssuer);
+                else if (escapedLabel != null)
+                    sb.Append(escapedLabel);
 
                 sb.Append("?secret=" + strippedSecret);
 

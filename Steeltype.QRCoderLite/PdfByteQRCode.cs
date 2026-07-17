@@ -69,7 +69,7 @@ namespace Steeltype.QRCoderLite
 
             // Binary comment
             stream.Write(PdfBinaryComment, 0, PdfBinaryComment.Length);
-            writer.WriteLine();
+            writer.Write("\r\n");
             writer.Flush();
 
             // Object 1: Catalog
@@ -77,13 +77,18 @@ namespace Steeltype.QRCoderLite
             writer.Write($"{xrefs.Count} 0 obj\r\n<<\r\n/Type /Catalog\r\n/Pages 2 0 R\r\n>>\r\nendobj\r\n");
             writer.Flush();
 
-            // Object 2: Pages
+            // Object 2: Pages — /Kids must hold an indirect reference to the Page
+            // object (ISO 32000 sec. 7.7.3.2), not an inline dictionary.
             xrefs.Add(stream.Position);
-            writer.Write($"{xrefs.Count} 0 obj\r\n<<\r\n/Count 1\r\n/Kids [ <<\r\n");
-            writer.Write($"/Type /Page\r\n/Parent 2 0 R\r\n");
+            writer.Write($"{xrefs.Count} 0 obj\r\n<<\r\n/Type /Pages\r\n/Count 1\r\n/Kids [ 3 0 R ]\r\n>>\r\nendobj\r\n");
+            writer.Flush();
+
+            // Object 3: Page
+            xrefs.Add(stream.Position);
+            writer.Write($"{xrefs.Count} 0 obj\r\n<<\r\n/Type /Page\r\n/Parent 2 0 R\r\n");
             writer.Write($"/MediaBox [0 0 {pdfMediaSize} {pdfMediaSize}]\r\n");
             writer.Write("/Resources << /ProcSet [ /PDF ] >>\r\n");
-            writer.Write("/Contents 3 0 R\r\n>> ]\r\n>>\r\nendobj\r\n");
+            writer.Write("/Contents 4 0 R\r\n>>\r\nendobj\r\n");
             writer.Flush();
 
             // Build content stream
@@ -103,11 +108,12 @@ namespace Steeltype.QRCoderLite
 
             var contentStr = content.ToString();
 
-            // Object 3: Content stream
+            // Object 4: Content stream. /Length counts the stream bytes only; the
+            // EOL before 'endstream' is excluded per ISO 32000 sec. 7.3.8.1.
             xrefs.Add(stream.Position);
-            writer.Write($"{xrefs.Count} 0 obj\r\n<< /Length {contentStr.Length} >>\r\nstream\r\n");
+            writer.Write($"{xrefs.Count} 0 obj\r\n<< /Length {Encoding.ASCII.GetByteCount(contentStr)} >>\r\nstream\r\n");
             writer.Write(contentStr);
-            writer.Write("endstream\r\nendobj\r\n");
+            writer.Write("\r\nendstream\r\nendobj\r\n");
             writer.Flush();
 
             var startxref = (int)stream.Position;

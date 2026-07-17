@@ -4,6 +4,8 @@
     {
         public static byte[] HexColorToByteArray(string colorString)
         {
+            ArgumentNullException.ThrowIfNull(colorString);
+
             // Remove the leading '#' if present.
             if (colorString.StartsWith("#"))
             {
@@ -31,18 +33,8 @@
                     throw new ArgumentException($"Invalid hex digit found in color string: {colorString.Substring(i * 2, 2)}");
                 }
             }
-    
-            return byteColor;
-        }
 
-        public static  byte[] IntTo4Byte(int inp)
-        {
-            var bytes = new byte[4];
-            bytes[3] = (byte)(inp >> 24);
-            bytes[2] = (byte)(inp >> 16);
-            bytes[1] = (byte)(inp >> 8);
-            bytes[0] = (byte)(inp);
-            return bytes;
+            return byteColor;
         }
     }
 }
